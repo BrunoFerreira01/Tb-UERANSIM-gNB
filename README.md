@@ -6,8 +6,9 @@ O objetivo principal é estudar e avaliar mecanismos de gestão dinâmica do fat
 
 ## Componentes Principais
 
-- **Open5GS** - Core 5G SA
-- **UERANSIM** - Simulador de UE e gNodeB para 5G
+- ~~**Open5GS** - Core 5G SA~~
+- **UERANSIM** - RAN 5G gNB
+- ~~**UERANSIM** - RAN 5G UE~~
 
 ## Estrutura do Repositório
 
