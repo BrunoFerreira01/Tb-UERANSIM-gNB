@@ -2,21 +2,11 @@
 
 import subprocess
 import sys
+from varAux import CORE, GNB, UE, CLI, WEBUI, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET, BOLD, UNDERLINE, INVERT
 
-BLACK = "\033[30m"  # Pouco usado para texto
-RED = "\033[31m"  # Erros, alertas
-GREEN = "\033[32m"  # Sucesso, informação geral
-YELLOW = "\033[33m"  # Avisos, destaque leve
-BLUE = "\033[34m"  # Títulos, links
-MAGENTA = "\033[35m"  # Destaque secundário
-CYAN = "\033[36m"  # Informações, comandos
-WHITE = "\033[37m"  # Texto normal, pouco usado
-RESET = "\033[0m"  # Voltar ao estilo padrão
-BOLD = "\033[1m"  # Texto em negrito
-UNDERLINE = "\033[4m"  # Sublinhado, bom para títulos
-INVERT = "\033[7m"  # Inverte cores do fundo e texto
 
 processos = []
+
 
 def executar_comando(comando, cwd):
     try:
@@ -62,13 +52,13 @@ def printHelp():
     print(
         f"  {YELLOW}core{RESET}            Executa o 5G Core {BLUE}(Open5GS){RESET}.")
 
-    if all or core:
+    if all or (core and CORE):
 
         print()
 
     print(f"  {YELLOW}gnb{RESET}             Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.")
 
-    if all or gnb:
+    if all or (gnb and GNB):
 
         print(
             f"    {CYAN}-c, --config {MAGENTA}<config-file>{RESET}  Use specified configuration file for gNB")
@@ -84,7 +74,7 @@ def printHelp():
     print(
         f"  {YELLOW}ue{RESET}              Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.")
 
-    if all or ue:
+    if all or (ue and UE):
 
         print(
             f"    {CYAN}-c, --config {MAGENTA}<config-file>{RESET}  Use specified configuration file for UE")
@@ -106,7 +96,7 @@ def printHelp():
 
     print(f"  {YELLOW}cli {MAGENTA}<node-name>{RESET} Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.")
 
-    if all or cli:
+    if all or (cli and CLI):
 
         print(
             f"    {CYAN}-d, --dump{RESET}            List all UE and gNBs in the environment")
@@ -120,6 +110,7 @@ def printHelp():
 
     print(
         f"  {YELLOW}webui{RESET}           Executa o Web UI {BLUE}(Open5GS){RESET}.")
+    
     print(f"  {YELLOW}multi {MAGENTA}<num>{RESET}     Abre o número especificado de terminais na mesma pasta.")
 
     print()
@@ -132,34 +123,61 @@ def processar_opcoes(opcao):
     num = 1
 
     if opcao == "core":
-        # comando = "./open5gs/build/tests/app/5gc"
-        comandos_core = [
-            "./open5gs/install/bin/open5gs-nrfd",
-            "./open5gs/install/bin/open5gs-scpd",
-            "./open5gs/install/bin/open5gs-amfd",
-            "./open5gs/install/bin/open5gs-smfd",
-            "./open5gs/install/bin/open5gs-ausfd",
-            "./open5gs/install/bin/open5gs-udmd",
-            "./open5gs/install/bin/open5gs-udrd",
-            "./open5gs/install/bin/open5gs-pcfd",
-            "./open5gs/install/bin/open5gs-nssfd",
-            "./open5gs/install/bin/open5gs-bsfd",
-            "./open5gs/install/bin/open5gs-upfd"
-        ]
-        return comandos_core, cwd, num
+
+        if CORE:
+            # comando = "./open5gs/build/tests/app/5gc"
+            comandos_core = [
+                "./open5gs/install/bin/open5gs-nrfd",
+                "./open5gs/install/bin/open5gs-scpd",
+                "./open5gs/install/bin/open5gs-amfd",
+                "./open5gs/install/bin/open5gs-smfd",
+                "./open5gs/install/bin/open5gs-ausfd",
+                "./open5gs/install/bin/open5gs-udmd",
+                "./open5gs/install/bin/open5gs-udrd",
+                "./open5gs/install/bin/open5gs-pcfd",
+                "./open5gs/install/bin/open5gs-nssfd",
+                "./open5gs/install/bin/open5gs-bsfd",
+                "./open5gs/install/bin/open5gs-upfd"
+            ]
+            return comandos_core, cwd, num
+        else:
+            print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
+
+            sys.exit(1)
+
 
     elif opcao == "gnb":
-        comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
+        if GNB:
+            comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
+        else:
+            print(f"\n{RED}Ambiente errado: {CYAN}GNB={GNB}{RED}.\n{RESET}")
+
+            sys.exit(1)
 
     elif opcao == "ue":
-        comando = "UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
+        if UE:
+            comando = "UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
+        else:
+            print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
+
+            sys.exit(1)
 
     elif opcao == "cli":
-        comando = "UERANSIM/build/nr-cli"
+        if CLI:
+            comando = "UERANSIM/build/nr-cli"
+        else:
+            print(f"\n{RED}Ambiente errado: {CYAN}CLI={CLI}{RED}.\n{RESET}")
+
+            sys.exit(1)
 
     elif opcao == "webui":
-        comando = "npm run dev"
-        cwd = "open5gs/webui"
+        if WEBUI:
+            comando = "npm run dev"
+            cwd = "open5gs/webui"
+        else:
+            print(f"\n{RED}Ambiente errado: {CYAN}WEBUI={WEBUI}{RED}.\n{RESET}")
+
+            sys.exit(1)
 
     elif opcao == "multi":
         comando = "gnome-terminal"
@@ -221,12 +239,14 @@ def main():
             proc.wait()
 
     except KeyboardInterrupt:
-        print(f"\n{YELLOW}{BOLD}Ctrl+C detetado. A terminar os processos...{RESET}\n")
+        print(
+            f"\n{YELLOW}{BOLD}Ctrl+C detetado. A terminar os processos...{RESET}\n")
 
         for proc in processos:
             proc.terminate()
-            
-        print(f"\n{GREEN}{BOLD}Todos os processos foram terminados com sucesso.{RESET}\n")
+
+        print(
+            f"\n{GREEN}{BOLD}Todos os processos foram terminados com sucesso.{RESET}\n")
 
 
 if __name__ == "__main__":
