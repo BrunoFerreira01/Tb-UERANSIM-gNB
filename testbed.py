@@ -16,11 +16,14 @@ BOLD = "\033[1m"  # Texto em negrito
 UNDERLINE = "\033[4m"  # Sublinhado, bom para títulos
 INVERT = "\033[7m"  # Inverte cores do fundo e texto
 
+processos = []
 
 def executar_comando(comando, cwd):
     try:
         print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{comando}{RESET}\n")
-        subprocess.run(comando, shell=True, check=True, cwd=cwd)
+        # subprocess.run(comando, shell=True, check=True, cwd=cwd)
+        proc = subprocess.Popen(comando, shell=True, cwd=cwd)
+        return proc
 
     except subprocess.CalledProcessError as e:
 
@@ -129,7 +132,21 @@ def processar_opcoes(opcao):
     num = 1
 
     if opcao == "core":
-        comando = "./open5gs/build/tests/app/5gc"
+        # comando = "./open5gs/build/tests/app/5gc"
+        comandos_core = [
+            "./open5gs/install/bin/open5gs-nrfd",
+            "./open5gs/install/bin/open5gs-scpd",
+            "./open5gs/install/bin/open5gs-amfd",
+            "./open5gs/install/bin/open5gs-smfd",
+            "./open5gs/install/bin/open5gs-ausfd",
+            "./open5gs/install/bin/open5gs-udmd",
+            "./open5gs/install/bin/open5gs-udrd",
+            "./open5gs/install/bin/open5gs-pcfd",
+            "./open5gs/install/bin/open5gs-nssfd",
+            "./open5gs/install/bin/open5gs-bsfd",
+            "./open5gs/install/bin/open5gs-upfd"
+        ]
+        return comandos_core, cwd, num
 
     elif opcao == "gnb":
         comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
@@ -176,7 +193,7 @@ def processar_opcoes(opcao):
 
             comando = ' '.join(comando.split() + sys.argv[2:])
 
-    return comando, cwd, num
+    return [comando], cwd, num
 
 
 def main():
@@ -188,10 +205,28 @@ def main():
 
     opcao = sys.argv[1]
 
-    comando, cwd, num = processar_opcoes(opcao)
+    comandos, cwd, num = processar_opcoes(opcao)
 
     for i in range(num):
-        executar_comando(comando, cwd)
+        for comando in comandos:
+            proc = executar_comando(comando, cwd)
+            if proc:
+                processos.append(proc)
+
+    print(f"\n{CYAN}{BOLD}Total de processos iniciados: {len(processos)}{RESET}\n")
+
+    try:
+        # Espera por todos os processos — bloqueia até que sejam terminados
+        for proc in processos:
+            proc.wait()
+
+    except KeyboardInterrupt:
+        print(f"\n{YELLOW}{BOLD}Ctrl+C detetado. A terminar os processos...{RESET}\n")
+
+        for proc in processos:
+            proc.terminate()
+            
+        print(f"\n{GREEN}{BOLD}Todos os processos foram terminados com sucesso.{RESET}\n")
 
 
 if __name__ == "__main__":

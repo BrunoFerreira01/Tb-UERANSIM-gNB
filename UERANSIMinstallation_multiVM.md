@@ -91,17 +91,65 @@ Both are defined and setup through config files in the config/ directory,
 
 ### Configuring & Starting the gNodeB
 
-> <mark>Não executei estas alterações visto que o Open5GS e o UERANSIM estão na mesma VM.</mark> {
-> 
-> While we’re not actually going to bring anything “on air” in the RF sense, we’ll still need to configure and start our gNodeB.
-> 
-> All the parameters for our gNodeB are set in the config/open5gs-gnb.yaml file,
-> 
-> Inside here we’ll need to set the the parameters of our simulated gNodeB, for us this means (unless you’ve changed the PLMN etc) just changing the Link IPs that the gNodeB binds to, and the IP of the AMFs (for me it’s 10.0.1.207) – you’ll need to substitute these IPs with your own of course.
-> 
-> ![Setting gNodeB config](https://nickvsnetworking.com/wp-content/uploads/2021/03/Setting-gNodeB-config.gif)
-> 
-> }
+While we’re not actually going to bring anything “on air” in the RF sense, we’ll still need to configure and start our gNodeB.
+
+#### Find IP Address
+
+Finds the IP address of the VM's internet connection interface.
+
+```bash
+$ ip address show # On Core VM
+# Output
+inet: 192.168.76.128
+
+$ ip address show # On gNB VM
+# Output
+inet: 192.168.76.130
+
+$ ip address show # On UE VM
+# Output
+inet: 192.168.76.131
+```
+
+#### Configure UERANSIM gNB files
+
+All the parameters for our gNodeB are set in the config/open5gs-gnb.yaml file,
+
+Inside here we’ll need to set the the parameters of our simulated gNodeB, for us this means (unless you’ve changed the PLMN etc) just changing the Link IPs that the gNodeB binds to, and the IP of the AMFs (for me it’s 10.0.1.207) – you’ll need to substitute these IPs with your own of course.
+
+```diff
+- mcc: '999'          # Mobile Country Code value
+- mnc: '70'           # Mobile Network Code value (2 or 3 digits)
++ mcc: '001'          # Mobile Country Code value
++ mnc: '01'           # Mobile Network Code value (2 or 3 digits)
+
+nci: '0x000000010'  # NR Cell Identity (36-bit)
+idLength: 32        # NR gNB ID length in bits [22...32]
+tac: 1              # Tracking Area Code
+
+- linkIp: 127.0.0.1   # gNB's local IP address for Radio Link Simulation (Usually same with local IP)
+- ngapIp: 127.0.0.1   # gNB's local IP address for N2 Interface (Usually same with local IP)
+- gtpIp: 127.0.0.1    # gNB's local IP address for N3 Interface (Usually same with local IP)
++ linkIp: 192.168.76.130   # gNB's local IP address for Radio Link Simulation (Usually same with local IP)
++ ngapIp: 192.168.76.130   # gNB's local IP address for N2 Interface (Usually same with local IP)
++ gtpIp: 192.168.76.130    # gNB's local IP address for N3 Interface (Usually same with local IP)
+
+# List of AMF address information
+amfConfigs:
+-   - address: 127.0.0.5
++   - address: 192.168.76.128
+    port: 38412
+
+# List of supported S-NSSAIs by this gNB
+slices:
+  - sst: 1
+
+# Indicates whether or not SCTP stream number errors should be ignored.
+ignoreStreamIds: true
+```
+
+![Setting gNodeB config](https://nickvsnetworking.com/wp-content/uploads/2021/03/Setting-gNodeB-config.gif)
+
 
 Now we should be able to start the gNodeB service and see the connection, let’s take a look,
 
@@ -127,22 +175,22 @@ If we tail the logs on the Open5GS AMF we should also see the connection too:
 
 ### Configuring the UE Simulator
 
-So with our gNodeB “On the air” next up we’ll connect a simulated UE to our simulated gNodeB.
-
-We’ll leave the nr-gnb service running and open up a new terminal to start the UE with:
-
-> <mark>Comando errado</mark> {
+> <mark>Não executei estas alterações visto que o foco é apenas o gNB.</mark> {
+> 
+> So with our gNodeB “On the air” next up we’ll connect a simulated UE to our simulated gNodeB.
+> 
+> We’ll leave the nr-gnb service running and open up a new terminal to start the UE with:
+> 
+> > <mark>Comando errado</mark> {
+> > 
+> > ```bash
+> > $ build/nr-gnb -c config/open5gs-gnb.yaml
+> > ```
+> > }
 > 
 > ```bash
-> $ build/nr-gnb -c config/open5gs-gnb.yaml
+> $ build/nr-ue -c config/open5gs-ue.yaml
 > ```
-> }
-
-```bash
-$ build/nr-ue -c config/open5gs-ue.yaml
-```
-
-> <mark>Não executei estas alterações visto que o Open5GS e o UERANSIM estão na mesma VM.</mark> {
 > 
 > But if you run it now, you’ll just see errors regarding the PLMN search failing,
 > 
@@ -154,34 +202,40 @@ $ build/nr-ue -c config/open5gs-ue.yaml
 > 
 > ![UE Registration failed](https://nickvsnetworking.com/wp-content/uploads/2021/03/UE-Registration-failed.gif)
 > 
+> 
+> 
+> So better but not working, we see the RRC was released with error “FIVEG_SERVICES_NOT_ALLOWED”, so why is this?
+> 
+> A quick look at the logs on Open5Gs provides the answer,
+> 
+> ![Open5GS logs](https://nickvsnetworking.com/wp-content/uploads/2021/03/image-5-768x191.png)
+> 
+> Of course, we haven’t configured the subscriber in Open5Gs’s UDM/UDR.
+> 
+> So we’ll browse to the web interface for Open5GS HSS/UDR and add a subscriber,
+> 
+> ![Configure Subscriber](https://nickvsnetworking.com/wp-content/uploads/2021/03/Configure-Subscriber.gif)
+> 
+> We’ll enter the IMSI, K key and OP key (make sure you’ve selected OPc and not OP), and save. You may notice the values match the defaults in the Open5GS Web UI, just without the spaces.
+> 
+> ![Open5GS Web UI on Edit subscriber screen](https://nickvsnetworking.com/wp-content/uploads/2021/03/image-6-768x366.png)
+> 
 > }
-
-So better but not working, we see the RRC was released with error “FIVEG_SERVICES_NOT_ALLOWED”, so why is this?
-
-A quick look at the logs on Open5Gs provides the answer,
-
-![Open5GS logs](https://nickvsnetworking.com/wp-content/uploads/2021/03/image-5-768x191.png)
-
-Of course, we haven’t configured the subscriber in Open5Gs’s UDM/UDR.
-
-So we’ll browse to the web interface for Open5GS HSS/UDR and add a subscriber,
-
-![Configure Subscriber](https://nickvsnetworking.com/wp-content/uploads/2021/03/Configure-Subscriber.gif)
-
-We’ll enter the IMSI, K key and OP key (make sure you’ve selected OPc and not OP), and save. You may notice the values match the defaults in the Open5GS Web UI, just without the spaces.
-
-![Open5GS Web UI on Edit subscriber screen](https://nickvsnetworking.com/wp-content/uploads/2021/03/image-6-768x366.png)
 
 ### Running the UE Simulator
 
-So now we’ve got all this configured we can run the UE simulator again, this time as Sudo, and we should get a very different ouput;
-
-```bash
-$ build/nr-gnb -c config/open5gs-gnb.yaml
-```
-
-Now when we run it we should see the session come up, and a new NIC is present on the machine, uesimtun0,
-
-![UE Simulator Running](https://nickvsnetworking.com/wp-content/uploads/2021/03/UE-Simulator-Running.gif)
-
-We can now run commands like Ping and Curl and by specifying our special uesimtun0 interface, and the traffic will be encapsulated in GTP and pop out the other end.
+> <mark>Não executei estas alterações visto que o foco é apenas o gNB.</mark> {
+> 
+> So now we’ve got all this configured we can run the UE simulator again, this time as Sudo, and we should get a very different ouput;
+> 
+> ```bash
+> $ build/nr-gnb -c config/open5gs-gnb.yaml
+> ```
+> 
+> Now when we run it we should see the session come up, and a new NIC is present on the machine, uesimtun0,
+> 
+> ![UE Simulator Running](https://nickvsnetworking.com/wp-content/uploads/2021/03/UE-Simulator-Running.gif)
+> 
+> We can now run commands like Ping and Curl and by specifying our special uesimtun0 interface, and the traffic will be encapsulated in GTP and pop out the other end.
+> 
+> }
