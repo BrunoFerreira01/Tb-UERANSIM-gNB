@@ -202,8 +202,6 @@ If we tail the logs on the Open5GS AMF we should also see the connection too:
 > 
 > ![UE Registration failed](https://nickvsnetworking.com/wp-content/uploads/2021/03/UE-Registration-failed.gif)
 > 
-> 
-> 
 > So better but not working, we see the RRC was released with error “FIVEG_SERVICES_NOT_ALLOWED”, so why is this?
 > 
 > A quick look at the logs on Open5Gs provides the answer,
