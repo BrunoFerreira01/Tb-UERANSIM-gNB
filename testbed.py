@@ -129,15 +129,15 @@ def processar_opcoes(opcao):
             comandos_core = [
                 "./open5gs/install/bin/open5gs-nrfd",
                 "./open5gs/install/bin/open5gs-scpd",
-                "./open5gs/install/bin/open5gs-amfd",
-                "./open5gs/install/bin/open5gs-smfd",
-                "./open5gs/install/bin/open5gs-ausfd",
                 "./open5gs/install/bin/open5gs-udmd",
                 "./open5gs/install/bin/open5gs-udrd",
+                "./open5gs/install/bin/open5gs-ausfd",
                 "./open5gs/install/bin/open5gs-pcfd",
                 "./open5gs/install/bin/open5gs-nssfd",
-                "./open5gs/install/bin/open5gs-bsfd",
-                "./open5gs/install/bin/open5gs-upfd"
+                "./open5gs/install/bin/open5gs-amfd",       # só depois dos anteriores
+                "./open5gs/install/bin/open5gs-smfd",
+                "./open5gs/install/bin/open5gs-upfd",
+                "./open5gs/install/bin/open5gs-bsfd"
             ]
             return comandos_core, cwd, num
         else:
@@ -156,7 +156,7 @@ def processar_opcoes(opcao):
 
     elif opcao == "ue":
         if UE:
-            comando = "UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
+            comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
 
