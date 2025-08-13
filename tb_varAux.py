@@ -1,5 +1,8 @@
 # varAux.py
 
+import re
+
+
 # ----- Enviroment ----- #
 CORE = False  # Para limitar o uso das funcionalidades ao contexto
 GNB = True  # Para limitar o uso das funcionalidades ao contexto
@@ -20,3 +23,6 @@ RESET = "\033[0m"  # Voltar ao estilo padrão
 BOLD = "\033[1m"  # Texto em negrito
 UNDERLINE = "\033[4m"  # Sublinhado, bom para títulos
 INVERT = "\033[7m"  # Inverte cores do fundo e texto
+
+# ----- ANSI ----- #
+ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')

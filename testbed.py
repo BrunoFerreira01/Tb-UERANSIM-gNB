@@ -1,11 +1,106 @@
 #!/usr/bin/env python3
 
-import subprocess
+import os
 import sys
-from varAux import CORE, GNB, UE, CLI, WEBUI, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET, BOLD, UNDERLINE, INVERT
+import subprocess
+import argparse
+import argcomplete
+from tb_varAux import *
+from tb_fncAux import *
+
+
+# echo 'eval "$(register-python-argcomplete ./testbed.py)"' >> ~/.bashrc
 
 
 processos = []
+
+
+def processArgs():
+
+    parser = argparse.ArgumentParser(prog=f"./{os.path.basename(sys.argv[0])}",
+                                     formatter_class=ColorHelpFormatter)
+
+    # Argumento Principal
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Sub Argumentos CORE
+    core_parser = subparsers.add_parser(name="core",
+                                        help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
+                                        formatter_class=ColorHelpFormatter)
+
+    # Sub Argumentos GNB
+    gnb_parser = subparsers.add_parser(name="gnb",
+                                       help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
+                                       formatter_class=ColorHelpFormatter)
+    gnb_parser.add_argument('-c', '--config',
+                            metavar='<config-file>', type=str, default='open5gs-gnb.yaml',
+                            help='Use specified configuration file for gNB')
+    gnb_parser.add_argument('-l', '--disable-cmd',
+                            action='store_true',
+                            help='Disable command line functionality for this instance')
+    gnb_parser.add_argument('-v', '--version',
+                            action='store_true',
+                            help='Show version information and exit')
+
+    # Sub Argumentos UE
+    ue_parser = subparsers.add_parser("ue",
+                                      help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
+                                      formatter_class=ColorHelpFormatter)
+    ue_parser.add_argument('-c', '--config',
+                           metavar='<config-file>', type=str, default='open5gs-ue.yaml',
+                           help='Use specified configuration file for UE')
+    ue_parser.add_argument('-i', '--imsi',
+                           metavar='<imsi>', type=str,
+                           help='Use specified IMSI number instead of provided one')
+    ue_parser.add_argument('-n', '--num-of-UE',
+                           metavar='<num>', type=int,
+                           help='Generate specified number of UEs starting from the given IMSI')
+    ue_parser.add_argument('-t', '--tempo',
+                           metavar='<tempo>', type=int,
+                           help='Starting delay in milliseconds for each of the UEs')
+    ue_parser.add_argument('-l', '--disable-cmd',
+                           action='store_true',
+                           help='Disable command line functionality for this instance')
+    ue_parser.add_argument('-r', '--no-routing-config',
+                           action='store_true',
+                           help='Do not auto configure routing for UE TUN interface')
+    ue_parser.add_argument('-v', '--version',
+                           action='store_true',
+                           help='Show version information and exit')
+
+    # Sub Argumentos CLI
+    cli_parser = subparsers.add_parser(name="cli",
+                                       help=f"Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.",
+                                       formatter_class=ColorHelpFormatter)
+    cli_parser.add_argument('-nn', '--node-name',
+                            metavar='<node-name>', type=str,
+                            help='Nome do node para executar CLI')
+    cli_parser.add_argument('-d', '--dump',
+                            action='store_true',
+                            help='List all UE and gNBs in the environment')
+    cli_parser.add_argument('-e', '--exec',
+                            metavar='<command>', type=str,
+                            help='Execute the given command directly without an interactive shell')
+    cli_parser.add_argument('-v', '--version',
+                            action='store_true',
+                            help='Show version information and exit')
+
+    # Sub Argumentos WEBUI
+    webui_parser = subparsers.add_parser(name="webui",
+                                         help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
+                                         formatter_class=ColorHelpFormatter)
+
+    # Sub Argumentos MULTI
+    multi_parser = subparsers.add_parser(name="multi",
+                                         help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
+                                         formatter_class=ColorHelpFormatter)
+    multi_parser.add_argument('num_terms',
+                              metavar='<num>', type=int,
+                              help='Número de terminais a abrir')
+
+    argcomplete.autocomplete(parser)
+
+    return parser.parse_args()
 
 
 def executar_comando(comando, cwd):
@@ -21,112 +116,19 @@ def executar_comando(comando, cwd):
         sys.exit(1)
 
 
-def printHelp():
-
-    all = False
-    core = False
-    gnb = False
-    ue = False
-    cli = False
-
-    if "all" in sys.argv[2:]:
-        all = True
-    else:
-        if "core" in sys.argv[2:]:
-            core = True
-        if "gnb" in sys.argv[2:]:
-            gnb = True
-        if "ue" in sys.argv[2:]:
-            ue = True
-        if "cli" in sys.argv[2:]:
-            cli = True
-
-    print()
-
-    print(f"{GREEN}Uso:{RESET}")
-    print(
-        f"  ./testbed.py {YELLOW}[OPÇÃO] {CYAN}[ARGUMENTOS] {MAGENTA}<VALORES>{RESET}\n")
-
-    print(f"{GREEN}Opções:{RESET}")
-    print(f"  {YELLOW}-h, --help{RESET}      Mostra esta ajuda e termina.")
-    print(
-        f"  {YELLOW}core{RESET}            Executa o 5G Core {BLUE}(Open5GS){RESET}.")
-
-    if all or (core and CORE):
-
-        print()
-
-    print(f"  {YELLOW}gnb{RESET}             Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.")
-
-    if all or (gnb and GNB):
-
-        print(
-            f"    {CYAN}-c, --config {MAGENTA}<config-file>{RESET}  Use specified configuration file for gNB")
-        print(
-            f"    {CYAN}-l, --disable-cmd{RESET}           Disable command line functionality for this instance")
-        print(
-            f"    {CYAN}-h, --help{RESET}                  Show this help message and exit")
-        print(
-            f"    {CYAN}-v, --version{RESET}               Show version information and exit")
-
-        print()
-
-    print(
-        f"  {YELLOW}ue{RESET}              Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.")
-
-    if all or (ue and UE):
-
-        print(
-            f"    {CYAN}-c, --config {MAGENTA}<config-file>{RESET}  Use specified configuration file for UE")
-        print(
-            f"    {CYAN}-i, --imsi {MAGENTA}<imsi>{RESET}           Use specified IMSI number instead of provided one")
-        print(f"    {CYAN}-n, --num-of-UE {MAGENTA}<num>{RESET}       Generate specified number of UEs starting from the given IMSI")
-        print(
-            f"    {CYAN}-t, --tempo {MAGENTA}<tempo>{RESET}         Starting delay in milliseconds for each of the UEs")
-        print(
-            f"    {CYAN}-l, --disable-cmd{RESET}           Disable command line functionality for this instance")
-        print(
-            f"    {CYAN}-r, --no-routing-config{RESET}     Do not auto configure routing for UE TUN interface")
-        print(
-            f"    {CYAN}-h, --help{RESET}                  Show this help message and exit")
-        print(
-            f"    {CYAN}-v, --version{RESET}               Show version information and exit")
-
-        print()
-
-    print(f"  {YELLOW}cli {MAGENTA}<node-name>{RESET} Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.")
-
-    if all or (cli and CLI):
-
-        print(
-            f"    {CYAN}-d, --dump{RESET}            List all UE and gNBs in the environment")
-        print(f"    {CYAN}-e, --exec {MAGENTA}<command>{RESET}  Execute the given command directly without an interactive shell")
-        print(
-            f"    {CYAN}-h, --help{RESET}            Show this help message and exit")
-        print(
-            f"    {CYAN}-v, --version{RESET}         Show version information and exit")
-
-        print()
-
-    print(
-        f"  {YELLOW}webui{RESET}           Executa o Web UI {BLUE}(Open5GS){RESET}.")
-    
-    print(f"  {YELLOW}multi {MAGENTA}<num>{RESET}     Abre o número especificado de terminais na mesma pasta.")
-
-    print()
-
-
-def processar_opcoes(opcao):
+def processar_opcoes(args):
 
     comando = None
     cwd = None
     num = 1
 
-    if opcao == "core":
+    if args.command == "core":
 
-        if CORE:
+        if CORE:  # Estou no ambiente CORE
+
             # comando = "./open5gs/build/tests/app/5gc"
-            comandos_core = [
+
+            comando = [
                 "./open5gs/install/bin/open5gs-nrfd",
                 "./open5gs/install/bin/open5gs-scpd",
                 "./open5gs/install/bin/open5gs-udmd",
@@ -139,91 +141,123 @@ def processar_opcoes(opcao):
                 "./open5gs/install/bin/open5gs-upfd",
                 "./open5gs/install/bin/open5gs-bsfd"
             ]
-            return comandos_core, cwd, num
+
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
 
             sys.exit(1)
 
+    elif args.command == "gnb":
 
-    elif opcao == "gnb":
-        if GNB:
-            comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
+        if GNB:  # Estou no ambiente GNB
+
+            comando = "UERANSIM/build/nr-gnb"
+
+            if args.config is not None:  # -c, --config <config-file>
+                comando += f" -c UERANSIM/config/{args.config}"
+
+            if args.disable_cmd:  # -l, --disable-cmd
+                comando += f" -l"
+
+            if args.version:  # -v, --version
+                comando += f" -v"
+
+            # comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
+
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}GNB={GNB}{RED}.\n{RESET}")
 
             sys.exit(1)
 
-    elif opcao == "ue":
-        if UE:
-            comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
+    elif args.command == "ue":
+
+        if UE:  # Estou no ambiente UE
+
+            comando = "UERANSIM/build/nr-ue"
+
+            if args.config is not None:  # -c, --config <config-file>
+                comando += f" -c UERANSIM/config/{args.config}"
+
+            if args.imsi is not None:  # -i, --imsi <imsi>
+                comando += f" -i {args.imsi}"
+
+            if args.num_of_UE is not None:  # -n, --num-of-UE <num>
+                comando += f" -n {args.num_of_UE}"
+
+            if args.tempo is not None:  # -t, --tempo <tempo>
+                comando += f" -t {args.tempo}"
+
+            if args.disable_cmd:  # -l, --disable-cmd
+                comando += f" -l"
+
+            if args.no_routing_config:  # -r, --no-routing-config
+                comando += f" -r"
+
+            if args.version:  # -v, --version
+                comando += f" -v"
+
+            # comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
+
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
 
             sys.exit(1)
 
-    elif opcao == "cli":
-        if CLI:
+    elif args.command == "cli":
+
+        if CLI:  # Estou no ambiente CLI
+
             comando = "UERANSIM/build/nr-cli"
+
+            if args.node_name is not None:  # -nn, --node-name <node-name>
+                comando += f" {args.node_name}"
+
+            if args.dump:  # -d, --dump
+                comando += f" -d"
+
+            if args.exec is not None:  # -e, --exec <command>
+                comando += f" -e {args.exec}"
+
+            if args.version:  # -v, --version
+                comando += f" -v"
+
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}CLI={CLI}{RED}.\n{RESET}")
 
             sys.exit(1)
 
-    elif opcao == "webui":
-        if WEBUI:
+    elif args.command == "webui":
+
+        if WEBUI:  # Estou no ambiente WEBUI
+
             comando = "npm run dev"
             cwd = "open5gs/webui"
+
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}WEBUI={WEBUI}{RED}.\n{RESET}")
 
             sys.exit(1)
 
-    elif opcao == "multi":
+    elif args.command == "multi":
         comando = "gnome-terminal"
 
-        if len(sys.argv) > 2:
+        num = int(args.num_terms)
 
-            try:
-                num = int(sys.argv[2])
+    # Se não for lista de comandos, porque o CORE são vários
+    if not isinstance(comando, list):
+        comando = [comando]
 
-            except ValueError:
-                print(
-                    f"\n{MAGENTA}{sys.argv[2]} {RED}não é um número válido.{RESET}")
-                printHelp()
-
-                sys.exit(1)
-        else:
-            print(f"\n{RED}Falta argumento {MAGENTA}<num>{RED}.{RESET}")
-            printHelp()
-
-            sys.exit(1)
-
-    else:
-        print(f"\n{RED}Opção inválida: {CYAN}{opcao}{RED}.{RESET}")
-        printHelp()
-
-        sys.exit(1)
-
-    if opcao in ["gnb", "ue", "cli"]:
-
-        if len(sys.argv) > 2:
-
-            comando = ' '.join(comando.split() + sys.argv[2:])
-
-    return [comando], cwd, num
+    return comando, cwd, num
 
 
 def main():
 
-    if len(sys.argv) < 2 or sys.argv[1] in ["-h", "--help"]:
-        printHelp()
+    args = processArgs()
 
-        sys.exit(1)
+    print(f"Comando selecionado: {args.command}")
+    print(args)
 
-    opcao = sys.argv[1]
-
-    comandos, cwd, num = processar_opcoes(opcao)
+    comandos, cwd, num = processar_opcoes(args)
 
     for i in range(num):
         for comando in comandos:
