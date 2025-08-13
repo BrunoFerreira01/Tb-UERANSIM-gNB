@@ -107,7 +107,7 @@ def executar_comando(comando, cwd):
     try:
         print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{comando}{RESET}\n")
         # subprocess.run(comando, shell=True, check=True, cwd=cwd)
-        proc = subprocess.Popen(comando, shell=True, cwd=cwd)
+        proc = subprocess.Popen(comando, shell=True, cwd=cwd, executable="/bin/bash")
         return proc
 
     except subprocess.CalledProcessError as e:
@@ -151,6 +151,11 @@ def processar_opcoes(args):
 
         if GNB:  # Estou no ambiente GNB
 
+            log_path = "UERANSIM/log/gnb.log"
+            
+            with open(log_path, "a") as log_file:
+                log_file.write("\n")
+
             comando = "UERANSIM/build/nr-gnb"
 
             if args.config is not None:  # -c, --config <config-file>
@@ -161,6 +166,8 @@ def processar_opcoes(args):
 
             if args.version:  # -v, --version
                 comando += f" -v"
+
+            comando += f" | tee -a {log_path}"
 
             # comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
 
@@ -173,7 +180,12 @@ def processar_opcoes(args):
 
         if UE:  # Estou no ambiente UE
 
-            comando = "UERANSIM/build/nr-ue"
+            log_path = "UERANSIM/log/ue.log"
+            
+            with open(log_path, "a") as log_file:
+                log_file.write("\n")
+
+            comando = "sudo UERANSIM/build/nr-ue"
 
             if args.config is not None:  # -c, --config <config-file>
                 comando += f" -c UERANSIM/config/{args.config}"
@@ -195,6 +207,8 @@ def processar_opcoes(args):
 
             if args.version:  # -v, --version
                 comando += f" -v"
+            
+            comando += f" | tee -a {log_path}"
 
             # comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
 
@@ -254,8 +268,8 @@ def main():
 
     args = processArgs()
 
-    print(f"Comando selecionado: {args.command}")
-    print(args)
+    # print(f"Comando selecionado: {args.command}")
+    # print(args)
 
     comandos, cwd, num = processar_opcoes(args)
 
