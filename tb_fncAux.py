@@ -1,7 +1,6 @@
 # fncAux.py
 
-import re
-import argparse
+
 from tb_varAux import *
 
 
@@ -95,3 +94,91 @@ class ColorHelpFormatter(argparse.HelpFormatter):
 
         lines[0] = color_usage(lines[0])
         return ''.join(lines)
+
+
+def splitLineFields(line):
+
+    if CORE:
+        padrao = r"^(\d{2}/\d{2}) (\d{2}:\d{2}:\d{2}\.\d+): \[([^\]]+)\] (\w+): (.*)$"
+    elif GNB or UE:
+        padrao = r"^\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d+)\] \[(.*?)\] \[(.*?)\] (.*)$"
+
+    match = re.match(padrao, line.strip())
+
+    data = None
+    hora = None
+    componente = None
+    tipo = None
+    mensagem = None
+
+    if match:
+        data, hora, componente, tipo, mensagem = match.groups()
+
+    return data.lower(), hora.lower(), componente.lower(), tipo.lower(), mensagem
+
+
+def colorLine(line, marcador):
+
+    if marcador in line or not line.strip():  # a linha do marcador da nova simulação nem as linhas vazias
+        return line
+
+    data, hora, componente, tipo, mensagem = splitLineFields(line)
+    COLOR = TYPE_COLOR.get(tipo, RESET)  # default: sem cor
+
+    lineColored = f"[{GREEN}{data} {hora}{RESET}] "
+    lineColored += f"[{BOLD}{YELLOW}{componente}{RESET}] "
+    lineColored += f"[{COLOR}{tipo}{RESET}] "
+    lineColored += f"{RESET}{mensagem}\n"
+
+    return lineColored
+
+
+def findLastMark(caminho_ficheiro, marcador, bloco=4096):
+
+    tamanho = os.path.getsize(caminho_ficheiro)
+
+    with open(caminho_ficheiro, "rb") as f:
+
+        pos = tamanho
+        buffer = b""
+
+        while pos > 0:
+
+            leitura = min(bloco, pos)
+            pos -= leitura
+            f.seek(pos)
+            buffer = f.read(leitura) + buffer
+
+            if marcador.encode() in buffer:
+                # Encontrou — determinar a última posição exata
+                ultima_pos = buffer.rfind(marcador.encode())
+                return pos + ultima_pos
+
+    return 0  # não encontrado, começa do início
+
+
+def tailLogFile(caminho_ficheiro, marcador, intervalo=0.5):
+
+    start_pos = findLastMark(caminho_ficheiro, marcador)
+
+    with open(caminho_ficheiro, "r") as f:
+
+        f.seek(start_pos)  # posiciona no marcador encontrado
+
+        print()
+
+        try:
+            while True:
+
+                linha = f.readline()
+
+                if not linha:
+                    time.sleep(intervalo)
+                    continue
+
+                print(colorLine(linha, marcador), end="")
+
+        except KeyboardInterrupt:
+            print(
+                f"\n{YELLOW}{BOLD}Ctrl+C detetado. Leitura do log terminada pelo utilizador.{RESET}\n")
+            sys.exit(1)

@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import subprocess
-import argparse
-import argcomplete
+
 from tb_varAux import *
 from tb_fncAux import *
 
@@ -98,16 +94,25 @@ def processArgs():
                               metavar='<num>', type=int,
                               help='Número de terminais a abrir')
 
+    # Sub Argumentos LOG
+    log_parser = subparsers.add_parser(name="log",
+                                       help=f"Mostra logs de um componente{RESET}.",
+                                       formatter_class=ColorHelpFormatter)
+    log_parser.add_argument('func',
+                            metavar='<func>', type=str, choices=list(FUNC_FILE.keys()),
+                            help='Componente cujos logs vão ser mostrados.')
+
     argcomplete.autocomplete(parser)
 
     return parser.parse_args()
 
 
-def executar_comando(comando, cwd):
+def execCommand(comando, cwd):
     try:
         print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{comando}{RESET}\n")
         # subprocess.run(comando, shell=True, check=True, cwd=cwd)
-        proc = subprocess.Popen(comando, shell=True, cwd=cwd, executable="/bin/bash")
+        proc = subprocess.Popen(comando, shell=True,
+                                cwd=cwd, executable="/bin/bash")
         return proc
 
     except subprocess.CalledProcessError as e:
@@ -116,7 +121,7 @@ def executar_comando(comando, cwd):
         sys.exit(1)
 
 
-def processar_opcoes(args):
+def processOptions(args):
 
     comando = None
     cwd = None
@@ -152,7 +157,7 @@ def processar_opcoes(args):
         if GNB:  # Estou no ambiente GNB
 
             log_path = "UERANSIM/log/gnb.log"
-            
+
             with open(log_path, "a") as log_file:
                 log_file.write("\n")
 
@@ -181,7 +186,7 @@ def processar_opcoes(args):
         if UE:  # Estou no ambiente UE
 
             log_path = "UERANSIM/log/ue.log"
-            
+
             with open(log_path, "a") as log_file:
                 log_file.write("\n")
 
@@ -207,7 +212,7 @@ def processar_opcoes(args):
 
             if args.version:  # -v, --version
                 comando += f" -v"
-            
+
             comando += f" | tee -a {log_path}"
 
             # comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
@@ -257,6 +262,48 @@ def processar_opcoes(args):
 
         num = int(args.num_terms)
 
+    elif args.command == "log":
+
+        func = list(FUNC_FILE.keys())
+        file = None
+        marcador = None
+
+        if CORE:  # Estou no ambiente CORE
+
+            if args.func in func[:-2]:
+                file = FUNC_FILE[args.func]
+                marcador = "Open5GS daemon v"
+
+            else:
+                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
+
+                sys.exit(1)
+
+        elif GNB:  # Estou no ambiente GNB
+
+            if args.func in func[-2]:
+                file = FUNC_FILE[args.func]
+                marcador = "UERANSIM v"
+
+            else:
+                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
+
+                sys.exit(1)
+
+        elif UE:  # Estou no ambiente UE
+
+            if args.func in func[-1]:
+                file = FUNC_FILE[args.func]
+                marcador = "UERANSIM v"
+
+            else:
+                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
+
+                sys.exit(1)
+
+        # Processar para a leitura do ficheiro
+        tailLogFile(file, marcador)
+
     # Se não for lista de comandos, porque o CORE são vários
     if not isinstance(comando, list):
         comando = [comando]
@@ -271,11 +318,11 @@ def main():
     # print(f"Comando selecionado: {args.command}")
     # print(args)
 
-    comandos, cwd, num = processar_opcoes(args)
+    comandos, cwd, num = processOptions(args)
 
     for i in range(num):
         for comando in comandos:
-            proc = executar_comando(comando, cwd)
+            proc = execCommand(comando, cwd)
             if proc:
                 processos.append(proc)
 
