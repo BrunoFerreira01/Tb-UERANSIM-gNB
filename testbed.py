@@ -29,7 +29,7 @@ def processArgs():
                                        help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
                                        formatter_class=ColorHelpFormatter)
     gnb_parser.add_argument('-c', '--config',
-                            metavar='<config-file>', type=str, default='open5gs-gnb.yaml',
+                            metavar='<config-file>', type=str, default='open5gs-gnb.yaml', choices=CONFIGFILES,
                             help='Use specified configuration file for gNB')
     gnb_parser.add_argument('-l', '--disable-cmd',
                             action='store_true',
@@ -43,7 +43,7 @@ def processArgs():
                                       help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
                                       formatter_class=ColorHelpFormatter)
     ue_parser.add_argument('-c', '--config',
-                           metavar='<config-file>', type=str, default='open5gs-ue.yaml',
+                           metavar='<config-file>', type=str, default='open5gs-ue.yaml', choices=CONFIGFILES,
                            help='Use specified configuration file for UE')
     ue_parser.add_argument('-i', '--imsi',
                            metavar='<imsi>', type=str,

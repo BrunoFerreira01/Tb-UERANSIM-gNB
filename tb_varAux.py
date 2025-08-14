@@ -62,3 +62,20 @@ TYPE_COLOR = {
     "error": RED,
     "fatal": MAGENTA
 }
+
+# ----- CONFIGFILES for GNB or UE ----- #
+CONFIGDIR = "UERANSIM/config"  # caminho absoluto na VM GNB/UE
+
+if os.path.isdir(CONFIGDIR):
+    if CORE:
+        CONFIGFILES = None
+    elif GNB:
+        CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
+                       if os.path.isfile(os.path.join(CONFIGDIR, f))
+                       and "gnb" in f
+                       and ("open5gs" in f or "o5gs" in f)]
+    elif UE:
+        CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
+                       if os.path.isfile(os.path.join(CONFIGDIR, f))
+                       and "ue" in f
+                       and ("open5gs" in f or "o5gs" in f)]
