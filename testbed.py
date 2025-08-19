@@ -17,7 +17,7 @@ def processArgs():
                                      formatter_class=ColorHelpFormatter)
 
     parser.add_argument('-nt', '--newterm',
-                        metavar='<num>', type=int, default=1,
+                        metavar='<num>', type=int, default=0, nargs='?', const=1,
                         help='Número de novos terminais a abrir adicionalmente.')
 
     # Argumento Principal
@@ -312,8 +312,6 @@ def main():
 
     comandos, cwd = processOptions(args)
 
-    print(comandos)
-
     if comandos != [None]:  # Se exisitir uma lista de comandos
 
         for comando in comandos:
@@ -322,6 +320,8 @@ def main():
 
             if proc:
                 processos.append(proc)
+
+    print(args.newterm)
 
     for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada
         execCommand("gnome-terminal", None)
