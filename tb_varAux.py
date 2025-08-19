@@ -92,7 +92,6 @@ if os.path.isdir(CONFIGDIR):
 
 
 # ----- CONFIGFILES for GNB or UE ----- #
-
 RUNDIR = None
 
 if CORE:
