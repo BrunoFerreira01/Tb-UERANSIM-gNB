@@ -16,10 +16,9 @@ def processArgs():
     parser = argparse.ArgumentParser(prog=f"./{os.path.basename(sys.argv[0])}",
                                      formatter_class=ColorHelpFormatter)
 
-    if CORE or GNB or UE:
-        parser.add_argument('-nt', '--newterm',
-                            metavar='<num>', type=int, default=1,
-                            help='Número de novos terminais a abrir adicionalmente.')
+    parser.add_argument('-nt', '--newterm',
+                        metavar='<num>', type=int, default=1,
+                        help='Número de novos terminais a abrir adicionalmente.')
 
     # Argumento Principal
     subparsers = parser.add_subparsers(dest="command")
@@ -111,7 +110,7 @@ def processArgs():
                                   action='store_true',
                                   help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if CORE or GNB or UE:  # Sub Argumentos LOG
+    if LOG:  # Sub Argumentos LOG
 
         log_parser = subparsers.add_parser(name="log",
                                            help=f"Mostra logs de um componente{RESET}.",
@@ -150,8 +149,6 @@ def processOptions(args):
     if args.command == "core":
 
         if CORE:  # Estou no ambiente CORE
-
-            # comando = "./open5gs/build/tests/app/5gc"
 
             comando = [
                 f"./{RUNDIR}/open5gs-nrfd",
@@ -194,8 +191,6 @@ def processOptions(args):
 
             comando += f" | tee -a {log_path}"
 
-            # comando = "UERANSIM/build/nr-gnb -c UERANSIM/config/open5gs-gnb.yaml"
-
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}GNB={GNB}{RED}.\n{RESET}")
 
@@ -234,8 +229,6 @@ def processOptions(args):
                 log_file.write("\n")
 
             comando += f" | tee -a {log_path}"
-
-            # comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
@@ -278,7 +271,7 @@ def processOptions(args):
             sys.exit(1)
 
     elif args.command == "log":
-    
+
         file = None
         marcador = None
 
@@ -297,7 +290,7 @@ def processOptions(args):
             file = f"{LOGDIR_GNB_UE}/{args.file}"
             marcador = "UERANSIM v"
 
-        for i in range(args.newterm):
+        for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada
             execCommand("gnome-terminal", None)
 
         # Processar para a leitura do ficheiro
@@ -321,13 +314,16 @@ def main():
 
     print(comandos)
 
-    if comandos != [None]:
+    if comandos != [None]:  # Se exisitir uma lista de comandos
+
         for comando in comandos:
+
             proc = execCommand(comando, cwd)
+
             if proc:
                 processos.append(proc)
 
-    for i in range(args.newterm):
+    for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada
         execCommand("gnome-terminal", None)
 
     print(f"\n{CYAN}{BOLD}Total de processos iniciados: {len(processos)}{RESET}\n")

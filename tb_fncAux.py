@@ -1,5 +1,9 @@
 # fncAux.py
-
+"""
+### Módulo: tb_fncAux.py
+Módulo responsável por disponibilizar ao script principal \\
+as funções auxiliares necessárias ao funcionamento.
+"""
 
 from tb_varAux import *
 

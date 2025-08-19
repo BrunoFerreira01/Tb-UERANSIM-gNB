@@ -1,5 +1,9 @@
 # varAux.py
-
+"""
+### Módulo: tb_varAux.py
+Módulo responsável por disponibilizar ao script principal\\
+as variáveis auxiliares necessárias ao funcionamento.
+"""
 
 import os
 import sys
@@ -9,13 +13,14 @@ import argparse
 import argcomplete
 import re
 
-
 # ----- Enviroment ----- #
 CORE = False  # Para limitar o uso das funcionalidades ao contexto
 GNB = True  # Para limitar o uso das funcionalidades ao contexto
 UE = False  # Para limitar o uso das funcionalidades ao contexto
-CLI = True  # Para limitar o uso das funcionalidades ao contexto
-WEBUI = False  # Para limitar o uso das funcionalidades ao contexto
+
+CLI = GNB or UE  # Para limitar o uso das funcionalidades ao contexto
+WEBUI = CORE  # Para limitar o uso das funcionalidades ao contexto
+LOG = CORE or GNB or UE  # Para limitar o uso das funcionalidades ao contexto
 
 
 # ----- Colors ----- #
