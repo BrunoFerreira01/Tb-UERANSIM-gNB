@@ -64,6 +64,8 @@ TYPE_COLOR = {
 }
 
 # ----- CONFIGFILES for GNB or UE ----- #
+CONFIGFILES = None
+
 CONFIGDIR = "UERANSIM/config"  # caminho absoluto na VM GNB/UE
 
 if os.path.isdir(CONFIGDIR):
