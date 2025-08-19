@@ -16,21 +16,28 @@ def processArgs():
     parser = argparse.ArgumentParser(prog=f"./{os.path.basename(sys.argv[0])}",
                                      formatter_class=ColorHelpFormatter)
 
+    if CORE or GNB or UE:
+        parser.add_argument('-nt', '--newterm',
+                            metavar='<num>', type=int, default=1,
+                            help='Número de novos terminais a abrir adicionalmente.')
+
     # Argumento Principal
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command")
 
-    if  CORE:
+    if CORE:  # Sub Argumentos CORE
 
-        # Sub Argumentos CORE
         core_parser = subparsers.add_parser(name="core",
                                             help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
                                             formatter_class=ColorHelpFormatter)
+        core_parser.add_argument('-nt', '--newterm',
+                                 action='store_true',
+                                 help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if GNB:
-        # Sub Argumentos GNB
+    if GNB:  # Sub Argumentos GNB
+
         gnb_parser = subparsers.add_parser(name="gnb",
-                                        help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
-                                        formatter_class=ColorHelpFormatter)
+                                           help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
+                                           formatter_class=ColorHelpFormatter)
         gnb_parser.add_argument('-c', '--config',
                                 metavar='<config-file>', type=str, default='open5gs-gnb.yaml', choices=CONFIGFILES,
                                 help='Use specified configuration file for gNB')
@@ -40,39 +47,45 @@ def processArgs():
         gnb_parser.add_argument('-v', '--version',
                                 action='store_true',
                                 help='Show version information and exit')
+        gnb_parser.add_argument('-nt', '--newterm',
+                                action='store_true',
+                                help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if UE:
-        # Sub Argumentos UE
+    if UE:  # Sub Argumentos UE
+
         ue_parser = subparsers.add_parser("ue",
-                                        help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
-                                        formatter_class=ColorHelpFormatter)
+                                          help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
+                                          formatter_class=ColorHelpFormatter)
         ue_parser.add_argument('-c', '--config',
-                            metavar='<config-file>', type=str, default='open5gs-ue.yaml', choices=CONFIGFILES,
-                            help='Use specified configuration file for UE')
+                               metavar='<config-file>', type=str, default='open5gs-ue.yaml', choices=CONFIGFILES,
+                               help='Use specified configuration file for UE')
         ue_parser.add_argument('-i', '--imsi',
-                            metavar='<imsi>', type=str,
-                            help='Use specified IMSI number instead of provided one')
+                               metavar='<imsi>', type=str,
+                               help='Use specified IMSI number instead of provided one')
         ue_parser.add_argument('-n', '--num-of-UE',
-                            metavar='<num>', type=int,
-                            help='Generate specified number of UEs starting from the given IMSI')
+                               metavar='<num>', type=int,
+                               help='Generate specified number of UEs starting from the given IMSI')
         ue_parser.add_argument('-t', '--tempo',
-                            metavar='<tempo>', type=int,
-                            help='Starting delay in milliseconds for each of the UEs')
+                               metavar='<tempo>', type=int,
+                               help='Starting delay in milliseconds for each of the UEs')
         ue_parser.add_argument('-l', '--disable-cmd',
-                            action='store_true',
-                            help='Disable command line functionality for this instance')
+                               action='store_true',
+                               help='Disable command line functionality for this instance')
         ue_parser.add_argument('-r', '--no-routing-config',
-                            action='store_true',
-                            help='Do not auto configure routing for UE TUN interface')
+                               action='store_true',
+                               help='Do not auto configure routing for UE TUN interface')
         ue_parser.add_argument('-v', '--version',
-                            action='store_true',
-                            help='Show version information and exit')
+                               action='store_true',
+                               help='Show version information and exit')
+        ue_parser.add_argument('-nt', '--newterm',
+                               action='store_true',
+                               help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if CLI:
-        # Sub Argumentos CLI
+    if CLI:  # Sub Argumentos CLI
+
         cli_parser = subparsers.add_parser(name="cli",
-                                        help=f"Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.",
-                                        formatter_class=ColorHelpFormatter)
+                                           help=f"Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.",
+                                           formatter_class=ColorHelpFormatter)
         cli_parser.add_argument('-nn', '--node-name',
                                 metavar='<node-name>', type=str,
                                 help='Nome do node para executar CLI')
@@ -85,30 +98,30 @@ def processArgs():
         cli_parser.add_argument('-v', '--version',
                                 action='store_true',
                                 help='Show version information and exit')
+        cli_parser.add_argument('-nt', '--newterm',
+                                action='store_true',
+                                help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if WEBUI:
-        # Sub Argumentos WEBUI
+    if WEBUI:  # Sub Argumentos WEBUI
+
         webui_parser = subparsers.add_parser(name="webui",
-                                            help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
-                                            formatter_class=ColorHelpFormatter)
+                                             help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
+                                             formatter_class=ColorHelpFormatter)
+        webui_parser.add_argument('-nt', '--newterm',
+                                  action='store_true',
+                                  help='Abre um novo terminal depois de executar a instrução principal.')
 
-    if CORE or GNB or UE:
-        # Sub Argumentos MULTI
-        multi_parser = subparsers.add_parser(name="multi",
-                                            help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
-                                            formatter_class=ColorHelpFormatter)
-        multi_parser.add_argument('num_terms',
-                                metavar='<num>', type=int,
-                                help='Número de terminais a abrir')
+    if CORE or GNB or UE:  # Sub Argumentos LOG
 
-    if CORE or GNB or UE:
-        # Sub Argumentos LOG
         log_parser = subparsers.add_parser(name="log",
-                                        help=f"Mostra logs de um componente{RESET}.",
-                                        formatter_class=ColorHelpFormatter)
+                                           help=f"Mostra logs de um componente{RESET}.",
+                                           formatter_class=ColorHelpFormatter)
         log_parser.add_argument('file',
                                 metavar='<file>', type=str, choices=LOGFILES,
                                 help='Fichiro cujo log vai ser mostrado.')
+        log_parser.add_argument('-nt', '--newterm',
+                                action='store_true',
+                                help='Abre um novo terminal depois de executar a instrução principal.')
 
     argcomplete.autocomplete(parser)
 
@@ -133,7 +146,6 @@ def processOptions(args):
 
     comando = None
     cwd = None
-    num = 1
 
     if args.command == "core":
 
@@ -265,13 +277,8 @@ def processOptions(args):
 
             sys.exit(1)
 
-    elif args.command == "multi":
-        comando = "gnome-terminal"
-
-        num = int(args.num_terms)
-
     elif args.command == "log":
-
+    
         file = None
         marcador = None
 
@@ -290,6 +297,9 @@ def processOptions(args):
             file = f"{LOGDIR_GNB_UE}/{args.file}"
             marcador = "UERANSIM v"
 
+        for i in range(args.newterm):
+            execCommand("gnome-terminal", None)
+
         # Processar para a leitura do ficheiro
         tailLogFile(file, marcador)
 
@@ -297,7 +307,7 @@ def processOptions(args):
     if not isinstance(comando, list):
         comando = [comando]
 
-    return comando, cwd, num
+    return comando, cwd
 
 
 def main():
@@ -307,13 +317,18 @@ def main():
     # print(f"Comando selecionado: {args.command}")
     # print(args)
 
-    comandos, cwd, num = processOptions(args)
+    comandos, cwd = processOptions(args)
 
-    for i in range(num):
+    print(comandos)
+
+    if comandos != [None]:
         for comando in comandos:
             proc = execCommand(comando, cwd)
             if proc:
                 processos.append(proc)
+
+    for i in range(args.newterm):
+        execCommand("gnome-terminal", None)
 
     print(f"\n{CYAN}{BOLD}Total de processos iniciados: {len(processos)}{RESET}\n")
 
