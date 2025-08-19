@@ -29,7 +29,7 @@ def processArgs():
                                             help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
                                             formatter_class=ColorHelpFormatter)
         core_parser.add_argument('-nt', '--newterm',
-                                 action='store_true',
+                                 metavar='<num>', type=int, default=0, nargs='?', const=1,
                                  help='Abre um novo terminal depois de executar a instrução principal.')
 
     if GNB:  # Sub Argumentos GNB
@@ -47,7 +47,7 @@ def processArgs():
                                 action='store_true',
                                 help='Show version information and exit')
         gnb_parser.add_argument('-nt', '--newterm',
-                                action='store_true',
+                                metavar='<num>', type=int, default=0, nargs='?', const=1,
                                 help='Abre um novo terminal depois de executar a instrução principal.')
 
     if UE:  # Sub Argumentos UE
@@ -77,7 +77,7 @@ def processArgs():
                                action='store_true',
                                help='Show version information and exit')
         ue_parser.add_argument('-nt', '--newterm',
-                               action='store_true',
+                               metavar='<num>', type=int, default=0, nargs='?', const=1,
                                help='Abre um novo terminal depois de executar a instrução principal.')
 
     if CLI:  # Sub Argumentos CLI
@@ -98,7 +98,7 @@ def processArgs():
                                 action='store_true',
                                 help='Show version information and exit')
         cli_parser.add_argument('-nt', '--newterm',
-                                action='store_true',
+                                metavar='<num>', type=int, default=0, nargs='?', const=1,
                                 help='Abre um novo terminal depois de executar a instrução principal.')
 
     if WEBUI:  # Sub Argumentos WEBUI
@@ -107,7 +107,7 @@ def processArgs():
                                              help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
                                              formatter_class=ColorHelpFormatter)
         webui_parser.add_argument('-nt', '--newterm',
-                                  action='store_true',
+                                  metavar='<num>', type=int, default=0, nargs='?', const=1,
                                   help='Abre um novo terminal depois de executar a instrução principal.')
 
     if LOG:  # Sub Argumentos LOG
@@ -119,7 +119,7 @@ def processArgs():
                                 metavar='<file>', type=str, choices=LOGFILES,
                                 help='Fichiro cujo log vai ser mostrado.')
         log_parser.add_argument('-nt', '--newterm',
-                                action='store_true',
+                                metavar='<num>', type=int, default=0, nargs='?', const=1,
                                 help='Abre um novo terminal depois de executar a instrução principal.')
 
     argcomplete.autocomplete(parser)
@@ -320,8 +320,6 @@ def main():
 
             if proc:
                 processos.append(proc)
-
-    print(args.newterm)
 
     for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada
         execCommand("gnome-terminal", None)
