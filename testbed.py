@@ -19,88 +19,96 @@ def processArgs():
     # Argumento Principal
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Sub Argumentos CORE
-    core_parser = subparsers.add_parser(name="core",
-                                        help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
-                                        formatter_class=ColorHelpFormatter)
+    if  CORE:
 
-    # Sub Argumentos GNB
-    gnb_parser = subparsers.add_parser(name="gnb",
-                                       help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
-                                       formatter_class=ColorHelpFormatter)
-    gnb_parser.add_argument('-c', '--config',
-                            metavar='<config-file>', type=str, default='open5gs-gnb.yaml', choices=CONFIGFILES,
-                            help='Use specified configuration file for gNB')
-    gnb_parser.add_argument('-l', '--disable-cmd',
+        # Sub Argumentos CORE
+        core_parser = subparsers.add_parser(name="core",
+                                            help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
+                                            formatter_class=ColorHelpFormatter)
+
+    if GNB:
+        # Sub Argumentos GNB
+        gnb_parser = subparsers.add_parser(name="gnb",
+                                        help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
+                                        formatter_class=ColorHelpFormatter)
+        gnb_parser.add_argument('-c', '--config',
+                                metavar='<config-file>', type=str, default='open5gs-gnb.yaml', choices=CONFIGFILES,
+                                help='Use specified configuration file for gNB')
+        gnb_parser.add_argument('-l', '--disable-cmd',
+                                action='store_true',
+                                help='Disable command line functionality for this instance')
+        gnb_parser.add_argument('-v', '--version',
+                                action='store_true',
+                                help='Show version information and exit')
+
+    if UE:
+        # Sub Argumentos UE
+        ue_parser = subparsers.add_parser("ue",
+                                        help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
+                                        formatter_class=ColorHelpFormatter)
+        ue_parser.add_argument('-c', '--config',
+                            metavar='<config-file>', type=str, default='open5gs-ue.yaml', choices=CONFIGFILES,
+                            help='Use specified configuration file for UE')
+        ue_parser.add_argument('-i', '--imsi',
+                            metavar='<imsi>', type=str,
+                            help='Use specified IMSI number instead of provided one')
+        ue_parser.add_argument('-n', '--num-of-UE',
+                            metavar='<num>', type=int,
+                            help='Generate specified number of UEs starting from the given IMSI')
+        ue_parser.add_argument('-t', '--tempo',
+                            metavar='<tempo>', type=int,
+                            help='Starting delay in milliseconds for each of the UEs')
+        ue_parser.add_argument('-l', '--disable-cmd',
                             action='store_true',
                             help='Disable command line functionality for this instance')
-    gnb_parser.add_argument('-v', '--version',
+        ue_parser.add_argument('-r', '--no-routing-config',
+                            action='store_true',
+                            help='Do not auto configure routing for UE TUN interface')
+        ue_parser.add_argument('-v', '--version',
                             action='store_true',
                             help='Show version information and exit')
 
-    # Sub Argumentos UE
-    ue_parser = subparsers.add_parser("ue",
-                                      help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
-                                      formatter_class=ColorHelpFormatter)
-    ue_parser.add_argument('-c', '--config',
-                           metavar='<config-file>', type=str, default='open5gs-ue.yaml', choices=CONFIGFILES,
-                           help='Use specified configuration file for UE')
-    ue_parser.add_argument('-i', '--imsi',
-                           metavar='<imsi>', type=str,
-                           help='Use specified IMSI number instead of provided one')
-    ue_parser.add_argument('-n', '--num-of-UE',
-                           metavar='<num>', type=int,
-                           help='Generate specified number of UEs starting from the given IMSI')
-    ue_parser.add_argument('-t', '--tempo',
-                           metavar='<tempo>', type=int,
-                           help='Starting delay in milliseconds for each of the UEs')
-    ue_parser.add_argument('-l', '--disable-cmd',
-                           action='store_true',
-                           help='Disable command line functionality for this instance')
-    ue_parser.add_argument('-r', '--no-routing-config',
-                           action='store_true',
-                           help='Do not auto configure routing for UE TUN interface')
-    ue_parser.add_argument('-v', '--version',
-                           action='store_true',
-                           help='Show version information and exit')
+    if CLI:
+        # Sub Argumentos CLI
+        cli_parser = subparsers.add_parser(name="cli",
+                                        help=f"Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.",
+                                        formatter_class=ColorHelpFormatter)
+        cli_parser.add_argument('-nn', '--node-name',
+                                metavar='<node-name>', type=str,
+                                help='Nome do node para executar CLI')
+        cli_parser.add_argument('-d', '--dump',
+                                action='store_true',
+                                help='List all UE and gNBs in the environment')
+        cli_parser.add_argument('-e', '--exec',
+                                metavar='<command>', type=str,
+                                help='Execute the given command directly without an interactive shell')
+        cli_parser.add_argument('-v', '--version',
+                                action='store_true',
+                                help='Show version information and exit')
 
-    # Sub Argumentos CLI
-    cli_parser = subparsers.add_parser(name="cli",
-                                       help=f"Executa a CLI para o Node especificado {BLUE}(UERANSIM){RESET}.",
-                                       formatter_class=ColorHelpFormatter)
-    cli_parser.add_argument('-nn', '--node-name',
-                            metavar='<node-name>', type=str,
-                            help='Nome do node para executar CLI')
-    cli_parser.add_argument('-d', '--dump',
-                            action='store_true',
-                            help='List all UE and gNBs in the environment')
-    cli_parser.add_argument('-e', '--exec',
-                            metavar='<command>', type=str,
-                            help='Execute the given command directly without an interactive shell')
-    cli_parser.add_argument('-v', '--version',
-                            action='store_true',
-                            help='Show version information and exit')
+    if WEBUI:
+        # Sub Argumentos WEBUI
+        webui_parser = subparsers.add_parser(name="webui",
+                                            help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
+                                            formatter_class=ColorHelpFormatter)
 
-    # Sub Argumentos WEBUI
-    webui_parser = subparsers.add_parser(name="webui",
-                                         help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
-                                         formatter_class=ColorHelpFormatter)
+    if CORE or GNB or UE:
+        # Sub Argumentos MULTI
+        multi_parser = subparsers.add_parser(name="multi",
+                                            help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
+                                            formatter_class=ColorHelpFormatter)
+        multi_parser.add_argument('num_terms',
+                                metavar='<num>', type=int,
+                                help='Número de terminais a abrir')
 
-    # Sub Argumentos MULTI
-    multi_parser = subparsers.add_parser(name="multi",
-                                         help=f"Executa o Web UI {BLUE}(Open5GS){RESET}.",
-                                         formatter_class=ColorHelpFormatter)
-    multi_parser.add_argument('num_terms',
-                              metavar='<num>', type=int,
-                              help='Número de terminais a abrir')
-
-    # Sub Argumentos LOG
-    log_parser = subparsers.add_parser(name="log",
-                                       help=f"Mostra logs de um componente{RESET}.",
-                                       formatter_class=ColorHelpFormatter)
-    log_parser.add_argument('func',
-                            metavar='<func>', type=str, choices=list(FUNC_FILE.keys()),
-                            help='Componente cujos logs vão ser mostrados.')
+    if CORE or GNB or UE:
+        # Sub Argumentos LOG
+        log_parser = subparsers.add_parser(name="log",
+                                        help=f"Mostra logs de um componente{RESET}.",
+                                        formatter_class=ColorHelpFormatter)
+        log_parser.add_argument('file',
+                                metavar='<file>', type=str, choices=LOGFILES,
+                                help='Fichiro cujo log vai ser mostrado.')
 
     argcomplete.autocomplete(parser)
 
@@ -134,17 +142,17 @@ def processOptions(args):
             # comando = "./open5gs/build/tests/app/5gc"
 
             comando = [
-                "./open5gs/install/bin/open5gs-nrfd",
-                "./open5gs/install/bin/open5gs-scpd",
-                "./open5gs/install/bin/open5gs-udmd",
-                "./open5gs/install/bin/open5gs-udrd",
-                "./open5gs/install/bin/open5gs-ausfd",
-                "./open5gs/install/bin/open5gs-pcfd",
-                "./open5gs/install/bin/open5gs-nssfd",
-                "./open5gs/install/bin/open5gs-amfd",       # só depois dos anteriores
-                "./open5gs/install/bin/open5gs-smfd",
-                "./open5gs/install/bin/open5gs-upfd",
-                "./open5gs/install/bin/open5gs-bsfd"
+                f"./{RUNDIR}/open5gs-nrfd",
+                f"./{RUNDIR}/open5gs-scpd",
+                f"./{RUNDIR}/open5gs-udmd",
+                f"./{RUNDIR}/open5gs-udrd",
+                f"./{RUNDIR}/open5gs-ausfd",
+                f"./{RUNDIR}/open5gs-pcfd",
+                f"./{RUNDIR}/open5gs-nssfd",
+                f"./{RUNDIR}/open5gs-amfd",       # só depois dos anteriores
+                f"./{RUNDIR}/open5gs-smfd",
+                f"./{RUNDIR}/open5gs-upfd",
+                f"./{RUNDIR}/open5gs-bsfd"
             ]
 
         else:
@@ -156,21 +164,21 @@ def processOptions(args):
 
         if GNB:  # Estou no ambiente GNB
 
-            log_path = "UERANSIM/log/gnb.log"
-
-            with open(log_path, "a") as log_file:
-                log_file.write("\n")
-
-            comando = "UERANSIM/build/nr-gnb"
+            comando = f"{RUNDIR}/nr-gnb"
 
             if args.config is not None:  # -c, --config <config-file>
-                comando += f" -c UERANSIM/config/{args.config}"
+                comando += f" -c {CONFIGDIR}/{args.config}"
 
             if args.disable_cmd:  # -l, --disable-cmd
                 comando += f" -l"
 
             if args.version:  # -v, --version
                 comando += f" -v"
+
+            log_path = f"{LOGDIR_GNB_UE}/{args.config.replace('.yaml', '.log')}"
+
+            with open(log_path, "a") as log_file:
+                log_file.write("\n")
 
             comando += f" | tee -a {log_path}"
 
@@ -185,15 +193,10 @@ def processOptions(args):
 
         if UE:  # Estou no ambiente UE
 
-            log_path = "UERANSIM/log/ue.log"
-
-            with open(log_path, "a") as log_file:
-                log_file.write("\n")
-
-            comando = "sudo UERANSIM/build/nr-ue"
+            comando = f"sudo {RUNDIR}/nr-ue"
 
             if args.config is not None:  # -c, --config <config-file>
-                comando += f" -c UERANSIM/config/{args.config}"
+                comando += f" -c {CONFIGDIR}/{args.config}"
 
             if args.imsi is not None:  # -i, --imsi <imsi>
                 comando += f" -i {args.imsi}"
@@ -213,6 +216,11 @@ def processOptions(args):
             if args.version:  # -v, --version
                 comando += f" -v"
 
+            log_path = f"{LOGDIR_GNB_UE}/{args.config.replace('.yaml', '.log')}"
+
+            with open(log_path, "a") as log_file:
+                log_file.write("\n")
+
             comando += f" | tee -a {log_path}"
 
             # comando = "sudo UERANSIM/build/nr-ue -c UERANSIM/config/open5gs-ue.yaml"
@@ -226,7 +234,7 @@ def processOptions(args):
 
         if CLI:  # Estou no ambiente CLI
 
-            comando = "UERANSIM/build/nr-cli"
+            comando = f"{RUNDIR}/nr-cli"
 
             if args.node_name is not None:  # -nn, --node-name <node-name>
                 comando += f" {args.node_name}"
@@ -264,42 +272,23 @@ def processOptions(args):
 
     elif args.command == "log":
 
-        func = list(FUNC_FILE.keys())
         file = None
         marcador = None
 
         if CORE:  # Estou no ambiente CORE
 
-            if args.func in func[:-2]:
-                file = FUNC_FILE[args.func]
-                marcador = "Open5GS daemon v"
-
-            else:
-                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
-
-                sys.exit(1)
+            file = f"{LOGDIR_CORE}/{args.file}"
+            marcador = "Open5GS daemon v"
 
         elif GNB:  # Estou no ambiente GNB
 
-            if args.func in func[-2]:
-                file = FUNC_FILE[args.func]
-                marcador = "UERANSIM v"
-
-            else:
-                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
-
-                sys.exit(1)
+            file = f"{LOGDIR_GNB_UE}/{args.file}"
+            marcador = "UERANSIM v"
 
         elif UE:  # Estou no ambiente UE
 
-            if args.func in func[-1]:
-                file = FUNC_FILE[args.func]
-                marcador = "UERANSIM v"
-
-            else:
-                print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
-
-                sys.exit(1)
+            file = f"{LOGDIR_GNB_UE}/{args.file}"
+            marcador = "UERANSIM v"
 
         # Processar para a leitura do ficheiro
         tailLogFile(file, marcador)

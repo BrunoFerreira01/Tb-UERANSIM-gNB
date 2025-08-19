@@ -17,6 +17,7 @@ UE = False  # Para limitar o uso das funcionalidades ao contexto
 CLI = True  # Para limitar o uso das funcionalidades ao contexto
 WEBUI = False  # Para limitar o uso das funcionalidades ao contexto
 
+
 # ----- Colors ----- #
 BLACK = "\033[30m"  # Pouco usado para texto
 RED = "\033[31m"  # Erros, alertas
@@ -31,28 +32,34 @@ BOLD = "\033[1m"  # Texto em negrito
 UNDERLINE = "\033[4m"  # Sublinhado, bom para títulos
 INVERT = "\033[7m"  # Inverte cores do fundo e texto
 
+
 # ----- ANSI ----- #
 ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
 
-# ----- FUNCTION & LOG FILE ----- #
-FUNC_FILE = {
-    # Componentes CORE
-    "nrf": "open5gs/install/var/log/open5gs/nrf.log",
-    "scp": "open5gs/install/var/log/open5gs/scp.log",
-    "udm": "open5gs/install/var/log/open5gs/udm.log",
-    "udr": "open5gs/install/var/log/open5gs/udr.log",
-    "ausf": "open5gs/install/var/log/open5gs/ausf.log",
-    "pcf": "open5gs/install/var/log/open5gs/pcf.log",
-    "nssf": "open5gs/install/var/log/open5gs/nssf.log",
-    "amf": "open5gs/install/var/log/open5gs/amf.log",
-    "smf": "open5gs/install/var/log/open5gs/smf.log",
-    "upf": "open5gs/install/var/log/open5gs/upf.log",
-    "bsf": "open5gs/install/var/log/open5gs/bsf.log",
-    # Componentes GNB
-    "gnb": "UERANSIM/log/gnb.log",
-    # Componentes UE
-    "ue": "UERANSIM/log/ue.log",
-}
+
+# ----- LOG FILE ----- #
+LOGFILES = None
+
+LOGDIR_CORE = "open5gs/install/var/log/open5gs"  # caminho absoluto na VM CORE
+LOGDIR_GNB_UE = "UERANSIM/log"  # caminho absoluto na VM GNB/UE
+
+if os.path.isdir(LOGDIR_CORE):
+    if CORE:
+        LOGFILES = [f for f in os.listdir(LOGDIR_CORE)
+                    if os.path.isfile(os.path.join(LOGDIR_CORE, f))]
+
+if os.path.isdir(LOGDIR_GNB_UE):
+    if GNB:
+        LOGFILES = [f for f in os.listdir(LOGDIR_GNB_UE)
+                    if os.path.isfile(os.path.join(LOGDIR_GNB_UE, f))
+                    and "gnb" in f
+                    and ("open5gs" in f or "o5gs" in f)]
+    elif UE:
+        LOGFILES = [f for f in os.listdir(LOGDIR_GNB_UE)
+                    if os.path.isfile(os.path.join(LOGDIR_GNB_UE, f))
+                    and "ue" in f
+                    and ("open5gs" in f or "o5gs" in f)]
+
 
 # ----- LOG TYPE & COLOR ----- #
 TYPE_COLOR = {
@@ -62,6 +69,7 @@ TYPE_COLOR = {
     "error": RED,
     "fatal": MAGENTA
 }
+
 
 # ----- CONFIGFILES for GNB or UE ----- #
 CONFIGFILES = None
@@ -81,3 +89,15 @@ if os.path.isdir(CONFIGDIR):
                        if os.path.isfile(os.path.join(CONFIGDIR, f))
                        and "ue" in f
                        and ("open5gs" in f or "o5gs" in f)]
+
+
+# ----- CONFIGFILES for GNB or UE ----- #
+
+RUNDIR = None
+
+if CORE:
+    RUNDIR = "open5gs/install/bin"
+elif GNB:
+    RUNDIR = "UERANSIM/build"
+elif UE:
+    RUNDIR = "UERANSIM/build"
