@@ -70,6 +70,7 @@ if os.path.isdir(LOGDIR_GNB_UE):
 TYPE_COLOR = {
     "info": GREEN,
     "debug": CYAN,
+    "trace": BLUE,
     "warning": YELLOW,
     "error": RED,
     "fatal": MAGENTA

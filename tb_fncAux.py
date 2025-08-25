@@ -109,16 +109,13 @@ def splitLineFields(line):
 
     match = re.match(padrao, line.strip())
 
-    data = None
-    hora = None
-    componente = None
-    tipo = None
-    mensagem = None
-
     if match:
         data, hora, componente, tipo, mensagem = match.groups()
 
-    return data.lower(), hora.lower(), componente.lower(), tipo.lower(), mensagem
+        return data.lower(), hora.lower(), componente.lower(), tipo.lower(), mensagem
+    
+    else:
+        return None, None, None, None, None
 
 
 def colorLine(line, marcador):
@@ -127,6 +124,10 @@ def colorLine(line, marcador):
         return line
 
     data, hora, componente, tipo, mensagem = splitLineFields(line)
+
+    if all(v is None for v in (data, hora, componente, tipo, mensagem)): # linhas que não tenham feito match
+        return line
+
     COLOR = TYPE_COLOR.get(tipo, RESET)  # default: sem cor
 
     lineColored = f"[{GREEN}{data} {hora}{RESET}] "
