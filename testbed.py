@@ -28,6 +28,11 @@ def processArgs():
         core_parser = subparsers.add_parser(name="core",
                                             help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
                                             formatter_class=ColorHelpFormatter)
+
+        core_parser.add_argument('components',
+                                 metavar='<component>', type=str, choices=COREFUNCT, default='defall', nargs="*",
+                                 help="Componentes do Core não padrão a executar.")
+
         core_parser.add_argument('-nt', '--newterm',
                                  metavar='<num>', type=int, default=0, nargs='?', const=1,
                                  help='Abre um novo terminal depois de executar a instrução principal.')
@@ -150,19 +155,43 @@ def processOptions(args):
 
         if CORE:  # Estou no ambiente CORE
 
-            comando = [
-                f"./{RUNDIR}/open5gs-nrfd",
-                f"./{RUNDIR}/open5gs-scpd",
-                f"./{RUNDIR}/open5gs-udmd",
-                f"./{RUNDIR}/open5gs-udrd",
-                f"./{RUNDIR}/open5gs-ausfd",
-                f"./{RUNDIR}/open5gs-pcfd",
-                f"./{RUNDIR}/open5gs-nssfd",
-                f"./{RUNDIR}/open5gs-amfd",       # só depois dos anteriores
-                f"./{RUNDIR}/open5gs-smfd",
-                f"./{RUNDIR}/open5gs-upfd",
-                f"./{RUNDIR}/open5gs-bsfd"
-            ]
+            comando = []
+            newFunct_Exec = {}
+
+            if "defall" not in args.components:
+
+                print(
+                    f"\n\n{GREEN}{BOLD}{INVERT} === Configuração das Funções de Rede === {RESET}\n\n\n{coreOptions()}")
+
+                for component in args.components:  # Para cada componente/função que não vai ser executada default
+
+                    print(
+                        f"\n\n{GREEN}{BOLD}{INVERT}={RESET} Configuração do {YELLOW}{BOLD}{component}{RESET}:\n")
+
+                    newConfigFIle = None
+                    configFileForComponent = [f for f in CONFIGFILES
+                                              if component in f]
+
+                    # Enquanto não for introduzido um COnfigFile correto para o componente/função
+                    while newConfigFIle not in configFileForComponent:
+
+                        newConfigFIle = input(
+                            f"    {MAGENTA}{BOLD}{INVERT}={RESET} Insira o ficheiro de configuração:\n          Opções: {MAGENTA}{BOLD}{configFileForComponent}{RESET}\n\n          > {MAGENTA}{BOLD}")
+                        print(f"{RESET}")
+
+                    # Acrescentar outras opções ao comando, é opcional, pode ser preenchida uma string vazia
+                    newOtherOptions = input(
+                        f"\n    {CYAN}{BOLD}{INVERT}={RESET} Insira as restantes opções:\n\n          > {CYAN}{BOLD}")
+                    print(f"{RESET}")
+
+                    newFunct_Exec[component] = f"{FUNCT_EXEC[component]} -c {CONFIGDIR}/{newConfigFIle} {newOtherOptions}".strip()
+
+            for cKey in FUNCT_EXEC.keys():  # Para contruir a nova lista de comandos
+
+                if cKey in newFunct_Exec:  # Se a função foi modificada
+                    comando.append(newFunct_Exec[cKey])
+                else:  # Se a função vai ser executada da forma default
+                    comando.append(FUNCT_EXEC[cKey])
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
@@ -184,7 +213,7 @@ def processOptions(args):
             if args.version:  # -v, --version
                 comando += f" -v"
 
-            log_path = f"{LOGDIR_GNB_UE}/{args.config.replace('.yaml', '.log')}"
+            log_path = f"{LOGDIR}/{args.config.replace('.yaml', '.log')}"
 
             with open(log_path, "a") as log_file:
                 log_file.write("\n")
@@ -223,7 +252,7 @@ def processOptions(args):
             if args.version:  # -v, --version
                 comando += f" -v"
 
-            log_path = f"{LOGDIR_GNB_UE}/{args.config.replace('.yaml', '.log')}"
+            log_path = f"{LOGDIR}/{args.config.replace('.yaml', '.log')}"
 
             with open(log_path, "a") as log_file:
                 log_file.write("\n")
@@ -272,22 +301,16 @@ def processOptions(args):
 
     elif args.command == "log":
 
-        file = None
+        file = f"{LOGDIR}/{args.file}"
         marcador = None
 
         if CORE:  # Estou no ambiente CORE
-
-            file = f"{LOGDIR_CORE}/{args.file}"
             marcador = "Open5GS daemon v"
 
         elif GNB:  # Estou no ambiente GNB
-
-            file = f"{LOGDIR_GNB_UE}/{args.file}"
             marcador = "UERANSIM v"
 
         elif UE:  # Estou no ambiente UE
-
-            file = f"{LOGDIR_GNB_UE}/{args.file}"
             marcador = "UERANSIM v"
 
         for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada

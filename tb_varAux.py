@@ -14,8 +14,8 @@ import argcomplete
 import re
 
 # ----- Enviroment ----- #
-CORE = False  # Para limitar o uso das funcionalidades ao contexto
-GNB = True  # Para limitar o uso das funcionalidades ao contexto
+CORE = True  # Para limitar o uso das funcionalidades ao contexto
+GNB = False  # Para limitar o uso das funcionalidades ao contexto
 UE = False  # Para limitar o uso das funcionalidades ao contexto
 
 CLI = GNB or UE  # Para limitar o uso das funcionalidades ao contexto
@@ -42,26 +42,32 @@ INVERT = "\033[7m"  # Inverte cores do fundo e texto
 ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
 
 
+# ----- LOG PATH for CORE, GNB and UE ----- #
+LOGDIR = None
+
+if CORE:
+    LOGDIR = "open5gs/install/var/log/open5gs"
+elif GNB:
+    LOGDIR = "UERANSIM/log"
+elif UE:
+    LOGDIR = "UERANSIM/log"
+
+
 # ----- LOG FILE ----- #
 LOGFILES = None
 
-LOGDIR_CORE = "open5gs/install/var/log/open5gs"  # caminho absoluto na VM CORE
-LOGDIR_GNB_UE = "UERANSIM/log"  # caminho absoluto na VM GNB/UE
-
-if os.path.isdir(LOGDIR_CORE):
+if os.path.isdir(LOGDIR):
     if CORE:
-        LOGFILES = [f for f in os.listdir(LOGDIR_CORE)
-                    if os.path.isfile(os.path.join(LOGDIR_CORE, f))]
-
-if os.path.isdir(LOGDIR_GNB_UE):
-    if GNB:
-        LOGFILES = [f for f in os.listdir(LOGDIR_GNB_UE)
-                    if os.path.isfile(os.path.join(LOGDIR_GNB_UE, f))
+        LOGFILES = [f for f in os.listdir(LOGDIR)
+                    if os.path.isfile(os.path.join(LOGDIR, f))]
+    elif GNB:
+        LOGFILES = [f for f in os.listdir(LOGDIR)
+                    if os.path.isfile(os.path.join(LOGDIR, f))
                     and "gnb" in f
                     and ("open5gs" in f or "o5gs" in f)]
     elif UE:
-        LOGFILES = [f for f in os.listdir(LOGDIR_GNB_UE)
-                    if os.path.isfile(os.path.join(LOGDIR_GNB_UE, f))
+        LOGFILES = [f for f in os.listdir(LOGDIR)
+                    if os.path.isfile(os.path.join(LOGDIR, f))
                     and "ue" in f
                     and ("open5gs" in f or "o5gs" in f)]
 
@@ -77,14 +83,25 @@ TYPE_COLOR = {
 }
 
 
+# ----- CONFIG PATH for CORE, GNB and UE ----- #
+CONFIGDIR = None
+
+if CORE:
+    CONFIGDIR = "open5gs/install/etc/open5gs"
+elif GNB:
+    CONFIGDIR = "UERANSIM/config"
+elif UE:
+    CONFIGDIR = "UERANSIM/config"
+
+
 # ----- CONFIGFILES for GNB or UE ----- #
 CONFIGFILES = None
 
-CONFIGDIR = "UERANSIM/config"  # caminho absoluto na VM GNB/UE
-
 if os.path.isdir(CONFIGDIR):
     if CORE:
-        CONFIGFILES = None
+        CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
+                       if os.path.isfile(os.path.join(CONFIGDIR, f))
+                       and not f.startswith("_")]
     elif GNB:
         CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
                        if os.path.isfile(os.path.join(CONFIGDIR, f))
@@ -97,7 +114,7 @@ if os.path.isdir(CONFIGDIR):
                        and ("open5gs" in f or "o5gs" in f)]
 
 
-# ----- CONFIGFILES for GNB or UE ----- #
+# ----- RUN PATH for CORE, GNB and UE ----- #
 RUNDIR = None
 
 if CORE:
@@ -106,3 +123,26 @@ elif GNB:
     RUNDIR = "UERANSIM/build"
 elif UE:
     RUNDIR = "UERANSIM/build"
+
+
+# ----- CORE FUNCTIONS ----- #
+
+COREFUNCT = None
+
+if CORE:
+    COREFUNCT = ['defall', 'nrf', 'scp', 'udm', 'udr',
+                 'ausf', 'pcf', 'nssf', 'amf', 'smf', 'upf', 'bsf']
+
+    FUNCT_EXEC = {
+        "nrf": f"./{RUNDIR}/open5gs-nrfd",
+        "scp": f"./{RUNDIR}/open5gs-scpd",
+        "udm": f"./{RUNDIR}/open5gs-udmd",
+        "udr": f"./{RUNDIR}/open5gs-udrd",
+        "ausf": f"./{RUNDIR}/open5gs-ausfd",
+        "pcf": f"./{RUNDIR}/open5gs-pcfd",
+        "nssf": f"./{RUNDIR}/open5gs-nssfd",
+        "amf": f"./{RUNDIR}/open5gs-amfd",   # depende dos anteriores
+        "smf": f"./{RUNDIR}/open5gs-smfd",
+        "upf": f"./{RUNDIR}/open5gs-upfd",
+        "bsf": f"./{RUNDIR}/open5gs-bsfd"
+    }

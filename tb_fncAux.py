@@ -113,7 +113,7 @@ def splitLineFields(line):
         data, hora, componente, tipo, mensagem = match.groups()
 
         return data.lower(), hora.lower(), componente.lower(), tipo.lower(), mensagem
-    
+
     else:
         return None, None, None, None, None
 
@@ -125,7 +125,8 @@ def colorLine(line, marcador):
 
     data, hora, componente, tipo, mensagem = splitLineFields(line)
 
-    if all(v is None for v in (data, hora, componente, tipo, mensagem)): # linhas que não tenham feito match
+    # linhas que não tenham feito match
+    if all(v is None for v in (data, hora, componente, tipo, mensagem)):
         return line
 
     COLOR = TYPE_COLOR.get(tipo, RESET)  # default: sem cor
@@ -187,3 +188,19 @@ def tailLogFile(caminho_ficheiro, marcador, intervalo=0.5):
             print(
                 f"\n{YELLOW}{BOLD}Ctrl+C detetado. Leitura do log terminada pelo utilizador.{RESET}\n")
             sys.exit(1)
+
+
+def coreOptions():
+    options = f"{GREEN}{BOLD}options{RESET}:\n"
+    options += f"  {CYAN}-c {MAGENTA}<filename>    {RESET}: set configuration file\n"
+    options += f"  {CYAN}-l {MAGENTA}<filename>    {RESET}: set logging file\n"
+    options += f"  {CYAN}-e {MAGENTA}<level>       {RESET}: set global log-level (default:info)\n"
+    options += f"  {CYAN}-m {MAGENTA}<domain>      {RESET}: set log-domain (e.g. mme:sgw:gtp)\n"
+    options += f"  {CYAN}-d               {RESET}: print lots of debugging information\n"
+    options += f"  {CYAN}-t               {RESET}: print tracing information for developer\n"
+    options += f"  {CYAN}-D               {RESET}: start as a daemon\n"
+    options += f"  {CYAN}-v               {RESET}: show version number and exit\n"
+    options += f"  {CYAN}-h               {RESET}: show this message and exit\n"
+    options += f"  {CYAN}-k               {RESET}: use <id> config section\n"
+
+    return options
