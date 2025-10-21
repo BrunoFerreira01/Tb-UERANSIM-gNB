@@ -14,8 +14,8 @@ import argcomplete
 import re
 
 # ----- Enviroment ----- #
-CORE = True  # Para limitar o uso das funcionalidades ao contexto
-GNB = False  # Para limitar o uso das funcionalidades ao contexto
+CORE = False  # Para limitar o uso das funcionalidades ao contexto
+GNB = True  # Para limitar o uso das funcionalidades ao contexto
 UE = False  # Para limitar o uso das funcionalidades ao contexto
 
 CLI = GNB or UE  # Para limitar o uso das funcionalidades ao contexto
