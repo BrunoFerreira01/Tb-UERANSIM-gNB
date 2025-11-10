@@ -3,6 +3,7 @@
 
 from tb_varAux import *
 from tb_fncAux import *
+from tb_clsAux import *
 
 
 # echo 'eval "$(register-python-argcomplete ./testbed.py)"' >> ~/.bashrc
@@ -28,11 +29,9 @@ def processArgs():
         core_parser = subparsers.add_parser(name="core",
                                             help=f"Executa o 5G Core {BLUE}(Open5GS){RESET}.",
                                             formatter_class=ColorHelpFormatter)
-
-        core_parser.add_argument('components',
-                                 metavar='<component>', type=str, choices=COREFUNCT, default='defall', nargs="*",
-                                 help="Componentes do Core não padrão a executar.")
-
+        core_parser.add_argument('netConfigFile',
+                                 metavar='<file>', type=str, choices=NETCONFFILES,
+                                 help='Fichiro de configuração da rede.')
         core_parser.add_argument('-nt', '--newterm',
                                  metavar='<num>', type=int, default=0, nargs='?', const=1,
                                  help='Abre um novo terminal depois de executar a instrução principal.')
@@ -42,15 +41,9 @@ def processArgs():
         gnb_parser = subparsers.add_parser(name="gnb",
                                            help=f"Executa o 5G RAN - gNodeB {BLUE}(UERANSIM){RESET}.",
                                            formatter_class=ColorHelpFormatter)
-        gnb_parser.add_argument('-c', '--config',
-                                metavar='<config-file>', type=str, required=True, choices=CONFIGFILES,
-                                help='Use specified configuration file for gNB')
-        gnb_parser.add_argument('-l', '--disable-cmd',
-                                action='store_true',
-                                help='Disable command line functionality for this instance')
-        gnb_parser.add_argument('-v', '--version',
-                                action='store_true',
-                                help='Show version information and exit')
+        gnb_parser.add_argument('netConfigFile',
+                                metavar='<file>', type=str, choices=NETCONFFILES,
+                                help='Fichiro de configuração da rede.')
         gnb_parser.add_argument('-nt', '--newterm',
                                 metavar='<num>', type=int, default=0, nargs='?', const=1,
                                 help='Abre um novo terminal depois de executar a instrução principal.')
@@ -60,27 +53,9 @@ def processArgs():
         ue_parser = subparsers.add_parser("ue",
                                           help=f"Executa o 5G RAN - UE {BLUE}(UERANSIM){RESET}.",
                                           formatter_class=ColorHelpFormatter)
-        ue_parser.add_argument('-c', '--config',
-                               metavar='<config-file>', type=str, required=True, choices=CONFIGFILES,
-                               help='Use specified configuration file for UE')
-        ue_parser.add_argument('-i', '--imsi',
-                               metavar='<imsi>', type=str,
-                               help='Use specified IMSI number instead of provided one')
-        ue_parser.add_argument('-n', '--num-of-UE',
-                               metavar='<num>', type=int,
-                               help='Generate specified number of UEs starting from the given IMSI')
-        ue_parser.add_argument('-t', '--tempo',
-                               metavar='<tempo>', type=int,
-                               help='Starting delay in milliseconds for each of the UEs')
-        ue_parser.add_argument('-l', '--disable-cmd',
-                               action='store_true',
-                               help='Disable command line functionality for this instance')
-        ue_parser.add_argument('-r', '--no-routing-config',
-                               action='store_true',
-                               help='Do not auto configure routing for UE TUN interface')
-        ue_parser.add_argument('-v', '--version',
-                               action='store_true',
-                               help='Show version information and exit')
+        ue_parser.add_argument('netConfigFile',
+                               metavar='<file>', type=str, choices=NETCONFFILES,
+                               help='Fichiro de configuração da rede.')
         ue_parser.add_argument('-nt', '--newterm',
                                metavar='<num>', type=int, default=0, nargs='?', const=1,
                                help='Abre um novo terminal depois de executar a instrução principal.')
@@ -146,52 +121,22 @@ def execCommand(comando, cwd):
         sys.exit(1)
 
 
-def processOptions(args):
+def processOptions(args, system: SystemConfig):
 
-    comando = None
+    comando = []
     cwd = None
 
     if args.command == "core":
 
         if CORE:  # Estou no ambiente CORE
 
-            comando = []
-            newFunct_Exec = {}
+            for nf_type, nf in system.core.network_functions.items():
 
-            if "defall" not in args.components:
+                for inst in nf.instances.values():
 
-                print(
-                    f"\n\n{GREEN}{BOLD}{INVERT} === Configuração das Funções de Rede === {RESET}\n\n\n{coreOptions()}")
-
-                for component in args.components:  # Para cada componente/função que não vai ser executada default
-
-                    print(
-                        f"\n\n{GREEN}{BOLD}{INVERT}={RESET} Configuração do {YELLOW}{BOLD}{component}{RESET}:\n")
-
-                    newConfigFIle = None
-                    configFileForComponent = [f for f in CONFIGFILES
-                                              if component in f]
-
-                    # Enquanto não for introduzido um COnfigFile correto para o componente/função
-                    while newConfigFIle not in configFileForComponent:
-
-                        newConfigFIle = input(
-                            f"    {MAGENTA}{BOLD}{INVERT}={RESET} Insira o ficheiro de configuração:\n          Opções: {MAGENTA}{BOLD}{configFileForComponent}{RESET}\n\n          > {MAGENTA}{BOLD}")
-                        print(f"{RESET}")
-
-                    # Acrescentar outras opções ao comando, é opcional, pode ser preenchida uma string vazia
-                    newOtherOptions = input(
-                        f"\n    {CYAN}{BOLD}{INVERT}={RESET} Insira as restantes opções:\n\n          > {CYAN}{BOLD}")
-                    print(f"{RESET}")
-
-                    newFunct_Exec[component] = f"{FUNCT_EXEC[component]} -c {CONFIGDIR}/{newConfigFIle} {newOtherOptions}".strip()
-
-            for cKey in FUNCT_EXEC.keys():  # Para contruir a nova lista de comandos
-
-                if cKey in newFunct_Exec:  # Se a função foi modificada
-                    comando.append(newFunct_Exec[cKey])
-                else:  # Se a função vai ser executada da forma default
-                    comando.append(FUNCT_EXEC[cKey])
+                    if inst.active:
+                        comando.append(
+                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()}")
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
@@ -202,23 +147,18 @@ def processOptions(args):
 
         if GNB:  # Estou no ambiente GNB
 
-            comando = f"{RUNDIR}/nr-gnb"
+            for nf_type, nf in system.ran.network_functions.items():
 
-            if args.config is not None:  # -c, --config <config-file>
-                comando += f" -c {CONFIGDIR}/{args.config}"
+                for inst in nf.instances.values():
 
-            if args.disable_cmd:  # -l, --disable-cmd
-                comando += f" -l"
+                    if inst.active and nf_type == "gNB":
+                        log_path = f"{LOGDIR}/{inst.config_file.replace('.yaml', '.log')}"
 
-            if args.version:  # -v, --version
-                comando += f" -v"
+                        with open(log_path, "a") as log_file:
+                            log_file.write("\n")
 
-            log_path = f"{LOGDIR}/{args.config.replace('.yaml', '.log')}"
-
-            with open(log_path, "a") as log_file:
-                log_file.write("\n")
-
-            comando += f" | tee -a {log_path}"
+                        comando.append(
+                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}")
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}GNB={GNB}{RED}.\n{RESET}")
@@ -229,35 +169,18 @@ def processOptions(args):
 
         if UE:  # Estou no ambiente UE
 
-            comando = f"sudo {RUNDIR}/nr-ue"
+            for nf_type, nf in system.ran.network_functions.items():
 
-            if args.config is not None:  # -c, --config <config-file>
-                comando += f" -c {CONFIGDIR}/{args.config}"
+                for inst in nf.instances.values():
 
-            if args.imsi is not None:  # -i, --imsi <imsi>
-                comando += f" -i {args.imsi}"
+                    if inst.active and nf_type == "UE":
+                        log_path = f"{LOGDIR}/{inst.config_file.replace('.yaml', '.log')}"
 
-            if args.num_of_UE is not None:  # -n, --num-of-UE <num>
-                comando += f" -n {args.num_of_UE}"
+                        with open(log_path, "a") as log_file:
+                            log_file.write("\n")
 
-            if args.tempo is not None:  # -t, --tempo <tempo>
-                comando += f" -t {args.tempo}"
-
-            if args.disable_cmd:  # -l, --disable-cmd
-                comando += f" -l"
-
-            if args.no_routing_config:  # -r, --no-routing-config
-                comando += f" -r"
-
-            if args.version:  # -v, --version
-                comando += f" -v"
-
-            log_path = f"{LOGDIR}/{args.config.replace('.yaml', '.log')}"
-
-            with open(log_path, "a") as log_file:
-                log_file.write("\n")
-
-            comando += f" | tee -a {log_path}"
+                        comando.append(
+                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}")
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
@@ -319,7 +242,7 @@ def processOptions(args):
         # Processar para a leitura do ficheiro
         tailLogFile(file, marcador)
 
-    # Se não for lista de comandos, porque o CORE são vários
+    # Se não for lista de comandos, porque o CORE, GNB e UE são vários
     if not isinstance(comando, list):
         comando = [comando]
 
@@ -333,7 +256,17 @@ def main():
     # print(f"Comando selecionado: {args.command}")
     # print(args)
 
-    comandos, cwd = processOptions(args)
+    system = SystemConfig.load_yaml(f"{NETCONFDIR}/{args.netConfigFile}") if args.command in [
+        "core", "gnb", "ue"] else None
+
+    print(system)
+
+    comandos, cwd = processOptions(args, system)
+
+    # for cmd in comandos:
+    #     print(cmd)
+
+    # system.save_yaml(f"{NETCONFDIR}/{args.netConfigFile}")
 
     if comandos != [None]:  # Se exisitir uma lista de comandos
 
@@ -350,7 +283,7 @@ def main():
     print(f"\n{CYAN}{BOLD}Total de processos iniciados: {len(processos)}{RESET}\n")
 
     try:
-        # Espera por todos os processos — bloqueia até que sejam terminados
+        # Espera por todos os processos: bloqueia até que sejam terminados
         for proc in processos:
             proc.wait()
 

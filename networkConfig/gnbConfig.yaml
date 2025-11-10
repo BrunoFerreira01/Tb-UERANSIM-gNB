@@ -1,0 +1,6 @@
+RAN:
+  gNB:
+    gnb0:
+      name: gnb0
+      active: true
+      config_file: o5gs-gnb-0-0.yaml

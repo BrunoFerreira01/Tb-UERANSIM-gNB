@@ -1,8 +1,8 @@
 # varAux.py
 """
 ### Módulo: tb_varAux.py
-Módulo responsável por disponibilizar ao script principal\\
-as variáveis auxiliares necessárias ao funcionamento.
+Módulo responsável por disponibilizar ao *script* principal\\
+as **variáveis** auxiliares necessárias ao funcionamento.
 """
 
 import os
@@ -12,6 +12,8 @@ import time
 import argparse
 import argcomplete
 import re
+import yaml
+from pathlib import Path
 
 # ----- Enviroment ----- #
 CORE = False  # Para limitar o uso das funcionalidades ao contexto
@@ -40,6 +42,15 @@ INVERT = "\033[7m"  # Inverte cores do fundo e texto
 
 # ----- ANSI ----- #
 ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+
+
+# ----- NETWORK CONFIG PATH and FILES for CORE, GNB and UE ----- #
+NETCONFDIR = "networkConfig"
+NETCONFFILES = None
+
+if os.path.isdir(NETCONFDIR):
+    NETCONFFILES = [f for f in os.listdir(NETCONFDIR)
+                    if os.path.isfile(os.path.join(NETCONFDIR, f))]
 
 
 # ----- LOG PATH for CORE, GNB and UE ----- #
@@ -125,14 +136,11 @@ elif UE:
     RUNDIR = "UERANSIM/build"
 
 
-# ----- CORE FUNCTIONS ----- #
-
-COREFUNCT = None
+# ----- NETWORK and RAN FUNCTIONS and EXECUTABLES PATH ----- #
+FUNCT_EXEC = None
+FUNCT_TYPES = None
 
 if CORE:
-    COREFUNCT = ['defall', 'nrf', 'scp', 'udm', 'udr',
-                 'ausf', 'pcf', 'nssf', 'amf', 'smf', 'upf', 'bsf']
-
     FUNCT_EXEC = {
         "nrf": f"./{RUNDIR}/open5gs-nrfd",
         "scp": f"./{RUNDIR}/open5gs-scpd",
@@ -146,3 +154,15 @@ if CORE:
         "upf": f"./{RUNDIR}/open5gs-upfd",
         "bsf": f"./{RUNDIR}/open5gs-bsfd"
     }
+    FUNCT_TYPES = ["NRF", "SCP", "UDM", "UDR", "AUSF",
+                   "PCF", "NSSF", "AMF", "SMF", "UPF", "BSF"]
+elif GNB:
+    FUNCT_EXEC = {
+        "gnb": f"{RUNDIR}/nr-gnb"
+    }
+    FUNCT_TYPES = ["gNB"]
+elif UE:
+    FUNCT_EXEC = {
+        "ue": f"{RUNDIR}/nr-ue"
+    }
+    FUNCT_TYPES = ["UE"]
