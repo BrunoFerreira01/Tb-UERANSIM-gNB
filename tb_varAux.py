@@ -163,6 +163,6 @@ elif GNB:
     FUNCT_TYPES = ["gNB"]
 elif UE:
     FUNCT_EXEC = {
-        "ue": f"{RUNDIR}/nr-ue"
+        "ue": f"sudo {RUNDIR}/nr-ue"
     }
     FUNCT_TYPES = ["UE"]
