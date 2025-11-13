@@ -13,6 +13,7 @@ class NetworkFunctionInstance:
     def __init__(self,
                  name: str | None = None,
                  active: bool = False,
+                 new_terminal: bool = False,
                  config_file: str | None = None,
                  log_file: str | None = None,
                  log_level: str | None = None,
@@ -25,6 +26,7 @@ class NetworkFunctionInstance:
                  ):
         self.name = name
         self.active = active
+        self.new_terminal = new_terminal
         # -c file    : set configuration file
         self.config_file = config_file
         # -l file    : set logging fil
@@ -49,6 +51,8 @@ class NetworkFunctionInstance:
         lines = []
         lines.append(
             f"  {WHITE}Active:{RESET}      {BOLD}{GREEN if self.active else RED}{self.active}{RESET}")
+        lines.append(
+            f"  {WHITE}New Terminal:{RESET}{GREEN if self.new_terminal else RED}{self.new_terminal}{RESET}")
         lines.append(
             f"  {WHITE}Config File:{RESET} {YELLOW}{self.config_file}{RESET}")
         if self.log_file:
@@ -115,6 +119,7 @@ class NetworkFunctionInstance:
         """Reinicia um atributo para o seu valor padrão."""
         defaults = {
             "active": False,
+            "new_terminal": False,
             "config_file": None,
             "log_file": None,
             "log_level": None,
@@ -141,6 +146,7 @@ class NetworkFunctionInstance:
 
         result["name"] = self.name
         result["active"] = self.active
+        result["new_terminal"] = self.new_terminal
         result["config_file"] = self.config_file
 
         return result
@@ -150,6 +156,7 @@ class NetworkFunctionInstance:
         return cls(
             name=data["name"],
             active=data.get("active", False),
+            new_terminal=data.get("new_terminal", False),
             config_file=data.get("config_file", None),
             log_file=data.get("log_file", None),
             log_level=data.get("log_level", None),
@@ -240,6 +247,7 @@ class gNBInstance:
     def __init__(self,
                  name: str | None = None,
                  active: bool = False,
+                 new_terminal: bool = False,
                  config_file: str | None = None,
                  disable_cmd: bool = False,
                  version: bool = False,
@@ -247,6 +255,7 @@ class gNBInstance:
                  ):
         self.name = name
         self.active = active
+        self.new_terminal = new_terminal
         # -c file   : Use specified configuration file for gNB
         self.config_file = config_file
         # -l        : Disable command line functionality for this instance
@@ -261,6 +270,8 @@ class gNBInstance:
         lines = []
         lines.append(
             f"  Active:{RESET}      {BOLD}{GREEN if self.active else RED}{self.active}{RESET}")
+        lines.append(
+            f"  New Terminal:{RESET}{GREEN if self.new_terminal else RED}{self.new_terminal}{RESET}")
         lines.append(
             f"  Config File:{RESET} {YELLOW}{self.config_file}{RESET}")
         if self.disable_cmd:
@@ -301,6 +312,7 @@ class gNBInstance:
         """Reinicia um atributo para o seu valor padrão."""
         defaults = {
             "active": False,
+            "new_terminal": False,
             "config_file": None,
             "disable_cmd": False,
             "version": False,
@@ -322,6 +334,7 @@ class gNBInstance:
 
         result["name"] = self.name
         result["active"] = self.active
+        result["new_terminal"] = self.new_terminal
         result["config_file"] = self.config_file
 
         return result
@@ -331,6 +344,7 @@ class gNBInstance:
         return cls(
             name=data["name"],
             active=data.get("active", False),
+            new_terminal=data.get("new_terminal", False),
             config_file=data.get("config_file", None),
             disable_cmd=data.get("disable_cmd", False),
             version=data.get("version", False),
@@ -342,6 +356,7 @@ class UEInstance:
     def __init__(self,
                  name: str | None = None,
                  active: bool = False,
+                 new_terminal: bool = False,
                  config_file: str | None = None,
                  imsi: str | None = None,
                  num_of_ue: int | None = None,
@@ -353,6 +368,7 @@ class UEInstance:
                  ):
         self.name = name
         self.active = active
+        self.new_terminal = new_terminal
         # -c file   : Use specified configuration file for UE
         self.config_file = config_file
         # -i imsi   : Use specified IMSI number instead of provided one
@@ -375,6 +391,8 @@ class UEInstance:
         lines = []
         lines.append(
             f"  {WHITE}Active:{RESET}      {BOLD}{GREEN if self.active else RED}{self.active}{RESET}")
+        lines.append(
+            f"  {WHITE}New Terminal:{RESET}{GREEN if self.new_terminal else RED}{self.new_terminal}{RESET}")
         lines.append(
             f"  {WHITE}Config File:{RESET} {YELLOW}{self.config_file}{RESET}")
         if self.imsi:
@@ -436,6 +454,7 @@ class UEInstance:
         """Reinicia um atributo para o seu valor padrão."""
         defaults = {
             "active": False,
+            "new_terminal": False,
             "config_file": None,
             "imsi": None,
             "num_of_ue": None,
@@ -461,6 +480,7 @@ class UEInstance:
 
         result["name"] = self.name
         result["active"] = self.active
+        result["new_terminal"] = self.new_terminal
         result["config_file"] = self.config_file
 
         return result
@@ -470,6 +490,7 @@ class UEInstance:
         return cls(
             name=data["name"],
             active=data.get("active", False),
+            new_terminal=data.get("new_terminal", False),
             config_file=data.get("config_file", None),
             imsi=data.get("imsi", None),
             num_of_ue=data.get("num_of_ue", None),

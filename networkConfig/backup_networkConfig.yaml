@@ -3,66 +3,79 @@ Core:
     nrf0:
       name: nrf0
       active: true
+      new_terminal: false
       config_file: nrf.yaml
   SCP:
     scp0:
       name: scp0
       active: true
+      new_terminal: false
       config_file: scp.yaml
   UDM:
     udm0:
       name: udm0
       active: true
+      new_terminal: false
       config_file: udm.yaml
   UDR:
     udr0:
       name: udr0
       active: true
+      new_terminal: false
       config_file: udr.yaml
   AUSF:
     ausf0:
       name: ausf0
       active: true
+      new_terminal: false
       config_file: ausf.yaml
   PCF:
     pcf0:
       name: pcf0
       active: true
+      new_terminal: false
       config_file: pcf.yaml
   NSSF:
     nssf0:
       name: nssf0
       active: true
+      new_terminal: false
       config_file: nssf.yaml
   AMF:
     amf0:
       name: amf0
       active: true
+      new_terminal: false
       config_file: amf.yaml
   SMF:
     smf0:
       name: smf0
       active: true
+      new_terminal: false
       config_file: smf.yaml
   UPF:
     upf0:
       name: upf0
       active: true
+      new_terminal: false
       config_file: upf.yaml
   BSF:
     bsf0:
       name: bsf0
       active: true
+      new_terminal: false
       config_file: bsf.yaml
 RAN:
   gNB:
     gnb0:
       name: gnb0
       active: true
+      new_terminal: false
       config_file: o5gs-gnb-0-0.yaml
   UE:
     ue0:
       name: ue0
       active: true
+      new_terminal: false
       config_file: o5gs-ue-1-0-1.yaml
 OtherConfigs: {}

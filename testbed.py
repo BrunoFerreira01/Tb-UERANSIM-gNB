@@ -135,8 +135,16 @@ def processOptions(args, system: SystemConfig):
                 for inst in nf.instances.values():
 
                     if inst.active:
-                        comando.append(
-                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()}")
+
+                        inst: NetworkFunctionInstance
+
+                        cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()}"
+
+                        if inst.new_terminal:
+                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+
+                        comando.append(cmd)
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}CORE={CORE}{RED}.\n{RESET}")
@@ -152,13 +160,21 @@ def processOptions(args, system: SystemConfig):
                 for inst in nf.instances.values():
 
                     if inst.active and nf_type == "gNB":
+
+                        inst: gNBInstance
+
                         log_path = f"{LOGDIR}/{inst.config_file.replace('.yaml', '.log')}"
 
                         with open(log_path, "a") as log_file:
                             log_file.write("\n")
 
-                        comando.append(
-                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}")
+                        cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}"
+
+                        if inst.new_terminal:
+                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+
+                        comando.append(cmd)
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}GNB={GNB}{RED}.\n{RESET}")
@@ -174,13 +190,21 @@ def processOptions(args, system: SystemConfig):
                 for inst in nf.instances.values():
 
                     if inst.active and nf_type == "UE":
+
+                        inst: UEInstance
+
                         log_path = f"{LOGDIR}/{inst.config_file.replace('.yaml', '.log')}"
 
                         with open(log_path, "a") as log_file:
                             log_file.write("\n")
 
-                        comando.append(
-                            f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}")
+                        cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}"
+
+                        if inst.new_terminal:
+                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+
+                        comando.append(cmd)
 
         else:
             print(f"\n{RED}Ambiente errado: {CYAN}UE={UE}{RED}.\n{RESET}")
