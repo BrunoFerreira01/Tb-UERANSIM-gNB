@@ -298,6 +298,8 @@ def main():
 
             proc = execCommand(comando, cwd)
 
+            time.sleep(1)
+
             if proc:
                 processos.append(proc)
 
