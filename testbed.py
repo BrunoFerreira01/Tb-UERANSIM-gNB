@@ -109,7 +109,7 @@ def processArgs():
 
 def execCommand(comando, cwd):
     try:
-        print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{comando}{RESET}\n")
+        print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{cleanString(comando)}{RESET}\n")
         # subprocess.run(comando, shell=True, check=True, cwd=cwd)
         proc = subprocess.Popen(comando, shell=True,
                                 cwd=cwd, executable="/bin/bash")

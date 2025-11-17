@@ -38,6 +38,21 @@ def _safe_substitute(text, pattern, repl):
     return _restore_ansi(text_sub, placeholders)
 
 
+def cleanString(texto: str) -> str:
+    # 1. Remover códigos ANSI (cores, bold, etc.)
+    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+    texto = ansi_escape.sub('', texto)
+
+    # 2. Remover caracteres de controlo como \n, \t, \r
+    invisiveis = dict.fromkeys(map(ord, '\n\r\t\f\v'), None)
+    texto = texto.translate(invisiveis)
+
+    # 3. Remover qualquer outro carácter de controlo ASCII (<32)
+    texto = ''.join(c for c in texto if c >= ' ')
+
+    return texto
+
+
 def color_usage(text):
     # Protege sequências ANSI para evitar conflito
     text_prot, placeholders = _protect_ansi(text)
