@@ -16,13 +16,14 @@ import yaml
 from pathlib import Path
 
 # ----- Enviroment ----- #
-CORE = False  # Para limitar o uso das funcionalidades ao contexto
-GNB = True  # Para limitar o uso das funcionalidades ao contexto
+CORE = True  # Para limitar o uso das funcionalidades ao contexto
+GNB = False  # Para limitar o uso das funcionalidades ao contexto
 UE = False  # Para limitar o uso das funcionalidades ao contexto
 
 CLI = GNB or UE  # Para limitar o uso das funcionalidades ao contexto
 WEBUI = CORE  # Para limitar o uso das funcionalidades ao contexto
 LOG = CORE or GNB or UE  # Para limitar o uso das funcionalidades ao contexto
+DIFF = CORE or GNB or UE  # Para limitar o uso das funcionalidades ao contexto
 
 
 # ----- Colors ----- #

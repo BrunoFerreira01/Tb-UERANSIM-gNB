@@ -102,6 +102,34 @@ def processArgs():
                                 metavar='<num>', type=int, default=0, nargs='?', const=1,
                                 help='Abre um novo terminal depois de executar a instrução principal.')
 
+    if DIFF:  # Sub Argumentos DIFF
+
+        diffnetworkconf_parser = subparsers.add_parser(name="diffnetworkconf",
+                                                       help=f"Mostra as diferenças entre dois ficheiros de configuração da rede{RESET}.",
+                                                       formatter_class=ColorHelpFormatter)
+        diffnetworkconf_parser.add_argument('file1',
+                                            metavar='<file1>', type=str, choices=NETCONFFILES,
+                                            help='Fichiro original a ser comparado.')
+        diffnetworkconf_parser.add_argument('file2',
+                                            metavar='<file2>', type=str, choices=NETCONFFILES,
+                                            help='Fichiro editado a ser comparado.')
+        diffnetworkconf_parser.add_argument('-nt', '--newterm',
+                                            metavar='<num>', type=int, default=0, nargs='?', const=1,
+                                            help='Abre um novo terminal depois de executar a instrução principal.')
+
+        diffinstanceconf_parser = subparsers.add_parser(name="diffinstanceconf",
+                                                        help=f"Mostra as diferenças entre dois ficheiros de configuração de instância{RESET}.",
+                                                        formatter_class=ColorHelpFormatter)
+        diffinstanceconf_parser.add_argument('file1',
+                                             metavar='<file1>', type=str, choices=CONFIGFILES,
+                                             help='Fichiro original a ser comparado.')
+        diffinstanceconf_parser.add_argument('file2',
+                                             metavar='<file2>', type=str, choices=CONFIGFILES,
+                                             help='Fichiro editado a ser comparado.')
+        diffinstanceconf_parser.add_argument('-nt', '--newterm',
+                                             metavar='<num>', type=int, default=0, nargs='?', const=1,
+                                             help='Abre um novo terminal depois de executar a instrução principal.')
+
     argcomplete.autocomplete(parser)
 
     return parser.parse_args()
@@ -265,6 +293,14 @@ def processOptions(args, system: SystemConfig):
 
         # Processar para a leitura do ficheiro
         tailLogFile(file, marcador)
+
+    elif args.command == "diffnetworkconf":
+
+        comando = f"diff -u --color=always {NETCONFDIR}/{args.file1} {NETCONFDIR}/{args.file2}"
+
+    elif args.command == "diffinstanceconf":
+
+        comando = f"diff -u --color=always {CONFIGDIR}/{args.file1} {CONFIGDIR}/{args.file2}"
 
     # Se não for lista de comandos, porque o CORE, GNB e UE são vários
     if not isinstance(comando, list):
