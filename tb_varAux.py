@@ -14,6 +14,7 @@ import argcomplete
 import re
 import yaml
 from pathlib import Path
+from typing import Literal
 
 # ----- Enviroment ----- #
 CORE = False  # Para limitar o uso das funcionalidades ao contexto

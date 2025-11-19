@@ -135,14 +135,22 @@ def processArgs():
     return parser.parse_args()
 
 
-def execCommand(comando, cwd):
+def execCommand(comando, cwd, waitType: Literal["pre_post_commands", "instance_commands"]):
     try:
         print(f"\n{GREEN}{BOLD}A executar: {YELLOW}{cleanString(comando)}{RESET}\n")
         # subprocess.run(comando, shell=True, check=True, cwd=cwd)
-        proc = subprocess.Popen(comando, shell=True,
-                                cwd=cwd, executable="/bin/bash")
+        proc = subprocess.Popen(comando,
+                                shell=True,
+                                cwd=cwd,
+                                executable="/bin/bash",
+                                stdin=sys.stdin,
+                                stdout=sys.stdout,
+                                stderr=sys.stderr)
 
-        time.sleep(SLEEP_BETWEEN_COMMANDS)
+        if waitType == "pre_post_commands":
+            proc.wait()  # <- espera terminar, incluindo sudo pedir passwd
+        elif waitType == "instance_commands":
+            time.sleep(SLEEP_BETWEEN_COMMANDS)
 
         return proc
 
