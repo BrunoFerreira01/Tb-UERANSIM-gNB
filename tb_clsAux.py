@@ -4,10 +4,11 @@
 Módulo responsável por disponibilizar ao *script* principal\\
 as **classes** auxiliares necessárias ao funcionamento.
 """
+
 from tb_varAux import *
 
-# === MODELOS DE DADOS ===
 
+# === MODELOS DE DADOS ===
 
 class NetworkFunctionInstance:
     def __init__(self,
