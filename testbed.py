@@ -180,8 +180,8 @@ def processOptions(args, system: SystemConfig):
                         cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()}"
 
                         if inst.new_terminal:
-                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
-                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+                            title = f"\"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -t {cleanString(title)} -- bash -c 'echo -e {title}; {cmd}; exec bash'"
 
                         comando.append(cmd)
 
@@ -210,8 +210,8 @@ def processOptions(args, system: SystemConfig):
                         cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}"
 
                         if inst.new_terminal:
-                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
-                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+                            title = f"\"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -t {cleanString(title)} -- bash -c 'echo -e {title}; {cmd}; exec bash'"
 
                         comando.append(cmd)
 
@@ -240,8 +240,8 @@ def processOptions(args, system: SystemConfig):
                         cmd = f"{FUNCT_EXEC[nf_type.lower()]} {inst.get_command()} | tee -a {log_path}"
 
                         if inst.new_terminal:
-                            title = f"echo -e \"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
-                            cmd = f"gnome-terminal -- bash -c '{title}; {cmd}; exec bash'"
+                            title = f"\"\n{BOLD}{BLUE}=== {CYAN}Function: {YELLOW}{nf_type.upper()} {BLUE}|{MAGENTA} Instance Name: {YELLOW}{inst.name}{BLUE} ==={RESET}\n\""
+                            cmd = f"gnome-terminal -t {cleanString(title)} -- bash -c 'echo -e {title}; {cmd}; exec bash'"
 
                         comando.append(cmd)
 
