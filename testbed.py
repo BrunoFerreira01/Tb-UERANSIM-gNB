@@ -6,7 +6,6 @@ from tb_fncAux import *
 from tb_clsAux import *
 
 
-
 # echo 'eval "$(register-python-argcomplete ./testbed.py)"' >> ~/.bashrc
 
 
@@ -142,6 +141,9 @@ def execCommand(comando, cwd):
         # subprocess.run(comando, shell=True, check=True, cwd=cwd)
         proc = subprocess.Popen(comando, shell=True,
                                 cwd=cwd, executable="/bin/bash")
+
+        time.sleep(SLEEP_BETWEEN_COMMANDS)
+
         return proc
 
     except subprocess.CalledProcessError as e:
@@ -322,6 +324,12 @@ def main():
 
     print(system)
 
+    # Executar comandos antes de iniciar a rede
+    if system:
+        for command in system.other_configs.bash_commands.pre:
+            execCommand(command, cwd=None)
+
+    # Construir comandos para iniciar a rede
     comandos, cwd = processOptions(args, system)
 
     # for cmd in comandos:
@@ -329,18 +337,15 @@ def main():
 
     # system.save_yaml(f"{NETCONFDIR}/{args.netConfigFile}")
 
+    # Executar comandos para iniciar a rede
     if comandos != [None]:  # Se exisitir uma lista de comandos
-
         for comando in comandos:
-
             proc = execCommand(comando, cwd)
-
-            time.sleep(0.5)
-
             if proc:
                 processos.append(proc)
 
-    for i in range(args.newterm):  # Se a opção de abrir novos terminais tenha sido ativada
+    # Se a opção de abrir novos terminais tenha sido ativada
+    for i in range(args.newterm):
         execCommand("gnome-terminal", None)
 
     print(f"\n{CYAN}{BOLD}Total de processos iniciados: {len(processos)}{RESET}\n")
@@ -349,6 +354,11 @@ def main():
         # Espera por todos os processos: bloqueia até que sejam terminados
         for proc in processos:
             proc.wait()
+
+        # Executar comandos depois de encerrar a rede
+        if system:
+            for command in system.other_configs.bash_commands.post:
+                execCommand(command, cwd=None)
 
     except KeyboardInterrupt:
         print(
@@ -359,6 +369,11 @@ def main():
 
         print(
             f"\n{GREEN}{BOLD}Todos os processos foram terminados com sucesso.{RESET}\n")
+
+        # Executar comandos depois de encerrar a rede
+        if system:
+            for command in system.other_configs.bash_commands.post:
+                execCommand(command, cwd=None)
 
 
 if __name__ == "__main__":

@@ -179,7 +179,7 @@ class NetworkFunction:
         header = f"{BOLD}{CYAN}{self.nf_type}:{RESET}"
         lines = [header]
         if not self.instances:
-            lines.append(f"  {MAGENTA}<no instances>{RESET}")
+            lines.append(f"  {RED}<no instances>{RESET}")
         else:
             for inst in self.instances.values():
                 # indentamos cada instância
@@ -512,7 +512,7 @@ class RANFunction:
         header = f"{BOLD}{CYAN}{self.func_type}:{RESET}"
         lines = [header]
         if not self.instances:
-            lines.append(f"  {MAGENTA}<no instances>{RESET}")
+            lines.append(f"  {RED}<no instances>{RESET}")
         else:
             for inst in self.instances.values():
                 inst_str = str(inst).replace("\n", "\n  ")
@@ -580,6 +580,71 @@ class RANConfig:
         return ran
 
 
+class BashCommands:
+    """Contém os comandos bash a executar antes (pre) e depois (post) da rede."""
+
+    def __init__(self, pre=None, post=None):
+        self.pre = pre or []
+        self.post = post or []
+
+    def __str__(self):
+        header = f"{BOLD}{CYAN}BashCommands:{RESET}"
+        lines = [header]
+
+        lines.append(f"  {BOLD}{MAGENTA}Pre Commands:{RESET}")
+
+        if not self.pre:
+            lines.append(f"    {RED}<no commands>{RESET}")
+        else:
+            for cmd in self.pre:
+                lines.append(f"    {WHITE}$ {YELLOW}{cmd}{RESET}")
+
+        lines.append(f"  {BOLD}{MAGENTA}Post Commands:{RESET}")
+
+        if not self.post:
+            lines.append(f"    {RED}<no commands>{RESET}")
+        else:
+            for cmd in self.post:
+                lines.append(f"    {WHITE}$ {YELLOW}{cmd}{RESET}")
+
+        return "\n".join(lines)
+
+    def to_dict(self):
+        return {"pre": self.pre, "post": self.post}
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict):
+            return cls()
+        return cls(pre=data.get("pre", []), post=data.get("post", []))
+
+
+class OtherConfigs:
+    """Contém todas as configurações adicionais (atualmente apenas BashCommands)."""
+
+    def __init__(self, bash_commands=None):
+        self.bash_commands = bash_commands or BashCommands()
+
+    def __str__(self):
+        header = f"{BOLD}{CYAN}Other Configurations:{RESET}"
+        lines = [header]
+
+        bash_commands_str = str(self.bash_commands).replace("\n", "\n  ")
+        lines.append(f"  {bash_commands_str}")
+
+        return "\n".join(lines)
+
+    def to_dict(self):
+        return {"BashCommands": self.bash_commands.to_dict()}
+
+    @classmethod
+    def from_dict(cls, data):
+        if not isinstance(data, dict):
+            return cls()
+        bash_data = data.get("BashCommands", {})
+        return cls(bash_commands=BashCommands.from_dict(bash_data))
+
+
 class SystemConfig:
     """Camada de topo que agrupa as configurações do Core e outras futuras."""
 
@@ -587,7 +652,7 @@ class SystemConfig:
 
         self.core = core or CoreConfig()
         self.ran = ran or RANConfig()
-        self.other_configs = other_configs or {}
+        self.other_configs = other_configs or OtherConfigs()
 
     def __str__(self):
         header = f"{BOLD}{BLUE}=== System Configuration ==={RESET}"
@@ -603,7 +668,6 @@ class SystemConfig:
             lines.append(str(self.core))
             lines.append(str(self.ran))
         if self.other_configs:
-            lines.append(f"{BOLD}{CYAN}Other Configurations:{RESET}")
             lines.append(str(self.other_configs))
         return "\n".join(lines)
 
@@ -622,7 +686,7 @@ class SystemConfig:
                 "RAN": self.ran.to_dict()
             }
         if self.other_configs:
-            data["OtherConfigs"] = self.other_configs
+            data["OtherConfigs"] = self.other_configs.to_dict()
         return data
 
     @classmethod
@@ -637,7 +701,9 @@ class SystemConfig:
             ran = RANConfig.from_dict({"UE": ran_data.get("UE", {})})
         else:
             ran = RANConfig.from_dict(ran_data)
-        other = data.get("OtherConfigs", {})
+
+        other = OtherConfigs.from_dict(data.get("OtherConfigs", {}))
+
         return cls(core=core, ran=ran, other_configs=other)
 
     def save_yaml(self, filename):

@@ -5,3 +5,9 @@ RAN:
       active: true
       new_terminal: false
       config_file: o5gs-gnb-0-0.yaml
+OtherConfigs:
+  BashCommands:
+    pre:
+      # - "echo teste 1"
+    post:
+      # - "echo teste 3"

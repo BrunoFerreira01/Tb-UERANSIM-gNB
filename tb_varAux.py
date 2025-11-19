@@ -25,6 +25,8 @@ WEBUI = CORE  # Para limitar o uso das funcionalidades ao contexto
 LOG = CORE or GNB or UE  # Para limitar o uso das funcionalidades ao contexto
 DIFF = CORE or GNB or UE  # Para limitar o uso das funcionalidades ao contexto
 
+SLEEP_BETWEEN_COMMANDS = 0.5 # Tempo de intervalo entre dois comandos consecutivos
+
 
 # ----- Colors ----- #
 BLACK = "\033[30m"  # Pouco usado para texto
