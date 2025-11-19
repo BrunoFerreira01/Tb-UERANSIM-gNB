@@ -335,7 +335,7 @@ def main():
     # Executar comandos antes de iniciar a rede
     if system:
         for command in system.other_configs.bash_commands.pre:
-            execCommand(command, cwd=None)
+            execCommand(command, cwd=None, waitType="pre_post_commands")
 
     # Construir comandos para iniciar a rede
     comandos, cwd = processOptions(args, system)
@@ -348,7 +348,7 @@ def main():
     # Executar comandos para iniciar a rede
     if comandos != [None]:  # Se exisitir uma lista de comandos
         for comando in comandos:
-            proc = execCommand(comando, cwd)
+            proc = execCommand(comando, cwd, waitType="instance_commands")
             if proc:
                 processos.append(proc)
 
@@ -366,7 +366,7 @@ def main():
         # Executar comandos depois de encerrar a rede
         if system:
             for command in system.other_configs.bash_commands.post:
-                execCommand(command, cwd=None)
+                execCommand(command, cwd=None, waitType="pre_post_commands")
 
     except KeyboardInterrupt:
         print(
@@ -381,7 +381,7 @@ def main():
         # Executar comandos depois de encerrar a rede
         if system:
             for command in system.other_configs.bash_commands.post:
-                execCommand(command, cwd=None)
+                execCommand(command, cwd=None, waitType="pre_post_commands")
 
 
 if __name__ == "__main__":
