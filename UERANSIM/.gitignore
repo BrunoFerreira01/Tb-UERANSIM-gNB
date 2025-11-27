@@ -1,3 +1,8 @@
+# E incluir apenas os ficheiros .yaml dos gNBs que funcionam com o Open5GS
+!config/*.yaml
+# E excluir apenas os ficheiros .yaml dos gNBs que NÃO funcionam com o Open5GS
+config/_*.yaml
+
 # Project specific (OTHERS)
 .idea
 cmake-build-*

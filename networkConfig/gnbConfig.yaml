@@ -1,10 +1,10 @@
 RAN:
   gNB:
-    gnb0:
-      name: gnb0
+    gnb1:
+      name: gnb1
       active: true
       new_terminal: false
-      config_file: o5gs-gnb-0-0.yaml
+      config_file: gnb1-{1,x,1,2}-{2,x,1,2}-{3,x,1,2}-{4,x,1,2}.yaml
 OtherConfigs:
   BashCommands:
     pre:

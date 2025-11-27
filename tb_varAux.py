@@ -78,13 +78,11 @@ if os.path.isdir(LOGDIR):
     elif GNB:
         LOGFILES = [f for f in os.listdir(LOGDIR)
                     if os.path.isfile(os.path.join(LOGDIR, f))
-                    and "gnb" in f
-                    and ("open5gs" in f or "o5gs" in f)]
+                    and "gnb" in f]
     elif UE:
         LOGFILES = [f for f in os.listdir(LOGDIR)
                     if os.path.isfile(os.path.join(LOGDIR, f))
-                    and "ue" in f
-                    and ("open5gs" in f or "o5gs" in f)]
+                    and "ue" in f]
 
 
 # ----- LOG TYPE & COLOR ----- #
@@ -120,13 +118,13 @@ if os.path.isdir(CONFIGDIR):
     elif GNB:
         CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
                        if os.path.isfile(os.path.join(CONFIGDIR, f))
-                       and "gnb" in f
-                       and ("open5gs" in f or "o5gs" in f)]
+                       and not f.startswith("_")
+                       and "gnb" in f]
     elif UE:
         CONFIGFILES = [f for f in os.listdir(CONFIGDIR)
                        if os.path.isfile(os.path.join(CONFIGDIR, f))
-                       and "ue" in f
-                       and ("open5gs" in f or "o5gs" in f)]
+                       and not f.startswith("_")
+                       and "ue" in f]
 
 
 # ----- RUN PATH for CORE, GNB and UE ----- #
