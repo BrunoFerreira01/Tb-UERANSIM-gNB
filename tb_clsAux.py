@@ -1,4 +1,4 @@
-# clsAux.py
+# tb_clsAux.py
 """
 ### Módulo: tb_clsAux.py
 Módulo responsável por disponibilizar ao *script* principal\\

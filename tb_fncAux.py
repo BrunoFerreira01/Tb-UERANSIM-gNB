@@ -1,4 +1,4 @@
-# fncAux.py
+# tb_fncAux.py
 """
 ### Módulo: tb_fncAux.py
 Módulo responsável por disponibilizar ao *script* principal \\

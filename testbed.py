@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+from tb_envAux import *
 from tb_varAux import *
 from tb_fncAux import *
 from tb_clsAux import *
